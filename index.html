@@ -1,0 +1,2013 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Арта Групп — Центр управления</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<script src="vendor/react.js"></script>
+<script src="vendor/react-dom.js"></script>
+<script src="vendor/prop-types.js"></script>
+<script src="vendor/recharts.js"></script>
+<script src="vendor/babel.js"></script>
+<style>
+  :root{
+    --bg:#F4F5F7; --card:#FFFFFF; --ink:#0F1419; --inksoft:#3B4250; --muted:#6B7280;
+    --hair:#E8EAEE; --hairsoft:#EFF1F4;
+    --lime:#D4FF3D; --lime-ink:#1A2300;
+    --mint:#B8DCC8; --mint-soft:#E5F1EB; --mint-deep:#5C8B73;
+    --green:#10B981; --green-soft:#D1FAE5; --green-ink:#0B5C45;
+    --red:#FF4D4F; --red-soft:#FFE4E6; --red-ink:#7A1417;
+    --amber:#F4B740; --amber-soft:#FFF1CF; --amber-ink:#7A4E00;
+    --blue:#2A6FDB; --blue-soft:#DBEAFE; --blue-ink:#1E3A8A;
+    --lilac:#8B5CF6; --lilac-soft:#EDE9FE; --lilac-ink:#5B21B6;
+    --mono:"JetBrains Mono",ui-monospace,Menlo,monospace;
+    --shadow:0 1px 0 rgba(15,20,25,.04), 0 0 0 1px rgba(15,20,25,.05);
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;padding:0;background:var(--bg);color:var(--ink);
+    font-family:"Manrope",-apple-system,system-ui,sans-serif;letter-spacing:-0.01em;
+    -webkit-font-smoothing:antialiased;}
+  ::-webkit-scrollbar{width:10px;height:10px}
+  ::-webkit-scrollbar-thumb{background:#d0d4da;border-radius:999px}
+  button{font-family:inherit}
+  /* ===== shell ===== */
+  .shell{max-width:1480px;margin:0 auto;padding:20px 28px 90px 100px;position:relative;min-height:100vh;}
+  @media(max-width:900px){ .shell{padding-left:28px} .rail{display:none} }
+  .rail{position:fixed;left:max(18px,calc(50vw - 740px + 18px));top:210px;width:52px;display:flex;flex-direction:column;gap:10px;z-index:40;}
+  .railbtn{width:48px;height:48px;border-radius:999px;background:#fff;box-shadow:var(--shadow);border:none;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;color:var(--inksoft);transition:.15s;position:relative;}
+  .railbtn:hover{transform:translateY(-1px);box-shadow:0 4px 14px rgba(15,20,25,.10);}
+  .railbtn.active{background:var(--ink);color:#fff;}
+  .railbtn .tip{position:absolute;left:58px;top:50%;transform:translateY(-50%);background:var(--ink);color:#fff;
+    font-size:12px;font-weight:600;padding:6px 11px;border-radius:9px;white-space:nowrap;opacity:0;pointer-events:none;transition:.15s;}
+  .railbtn:hover .tip{opacity:1;}
+  .railnum{position:absolute;right:-2px;top:-2px;width:17px;height:17px;border-radius:999px;background:var(--lime);color:var(--lime-ink);
+    font-size:10px;font-weight:800;display:flex;align-items:center;justify-content:center;}
+  /* ===== topbar ===== */
+  .topbar{display:flex;align-items:center;gap:12px;margin-bottom:26px;}
+  .logo{width:46px;height:46px;border-radius:14px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;flex-shrink:0;}
+  .nav{display:flex;gap:4px;background:#fff;border-radius:999px;padding:6px;box-shadow:var(--shadow);overflow-x:auto;}
+  .nav::-webkit-scrollbar{display:none}
+  .navpill{border:none;background:transparent;color:var(--ink);font-size:13.5px;font-weight:600;padding:10px 16px;border-radius:999px;cursor:pointer;white-space:nowrap;transition:.15s;}
+  .navpill:hover{background:var(--hairsoft);}
+  .navpill.active{background:var(--ink);color:#fff;}
+  .navpill .ast{opacity:.55;font-size:11px;margin-left:3px;}
+  .search{flex:1;min-width:140px;display:flex;align-items:center;gap:10px;background:#fff;border-radius:999px;padding:11px 18px;box-shadow:var(--shadow);color:var(--muted);font-size:13.5px;white-space:nowrap;overflow:hidden;}
+  .search .kbd{margin-left:auto;font-family:var(--mono);font-size:11px;background:var(--hairsoft);border-radius:7px;padding:3px 8px;color:var(--muted);}
+  .live{display:flex;align-items:center;gap:8px;background:#fff;border-radius:999px;padding:11px 16px;box-shadow:var(--shadow);font-size:13px;font-weight:700;}
+  .live .dot{width:9px;height:9px;border-radius:999px;background:var(--green);position:relative;}
+  .live .dot::after{content:"";position:absolute;inset:0;border-radius:999px;background:var(--green);animation:pulse 1.6s infinite;}
+  @keyframes pulse{0%{transform:scale(1);opacity:.7}70%{transform:scale(2.1);opacity:0}100%{opacity:0}}
+  .avatars{display:flex;align-items:center;}
+  .ava{width:34px;height:34px;border-radius:999px;border:2px solid #fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;margin-left:-9px;}
+  .ava:first-child{margin-left:0}
+  .iconbtn{width:44px;height:44px;border-radius:999px;background:#fff;box-shadow:var(--shadow);border:none;cursor:pointer;display:flex;align-items:center;justify-content:center;color:var(--inksoft);position:relative;flex-shrink:0;}
+  .iconbtn .reddot{position:absolute;top:9px;right:10px;width:8px;height:8px;border-radius:999px;background:var(--red);border:2px solid #fff;}
+  .profile{width:44px;height:44px;border-radius:999px;background:var(--ink);color:#fff;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:13px;flex-shrink:0;}
+  @media(max-width:1150px){ .search,.live,.avatars{display:none} }
+  /* ===== breadcrumbs + header ===== */
+  .crumbs{display:flex;align-items:center;gap:9px;font-size:13px;color:var(--muted);margin-bottom:10px;flex-wrap:wrap;}
+  .crumbs b{color:var(--ink);font-weight:700;}
+  .crumbs .sync{display:inline-flex;align-items:center;gap:7px;background:#fff;border-radius:999px;padding:5px 12px;box-shadow:var(--shadow);font-size:12px;font-weight:600;color:var(--inksoft);}
+  .crumbs .sync i{width:7px;height:7px;border-radius:999px;background:var(--green);display:inline-block;}
+  .pagehead{display:flex;align-items:flex-end;justify-content:space-between;gap:18px;margin-bottom:26px;flex-wrap:wrap;}
+  .pagehead h1{font-size:clamp(30px,3.4vw,44px);margin:0;font-weight:800;letter-spacing:-0.03em;line-height:1;display:flex;align-items:center;gap:14px;flex-wrap:wrap;}
+  .limebadge{background:var(--lime);color:var(--lime-ink);font-size:12.5px;font-weight:800;padding:7px 13px;border-radius:999px;display:inline-flex;align-items:center;gap:7px;letter-spacing:0;white-space:nowrap;}
+  .limebadge i{width:7px;height:7px;border-radius:999px;background:var(--lime-ink);display:inline-block;}
+  .headctl{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+  .datepill{background:#fff;border-radius:999px;padding:12px 18px;box-shadow:var(--shadow);font-size:13.5px;font-weight:700;display:flex;align-items:center;gap:9px;}
+  .exportbtn{background:var(--ink);color:#fff;border:none;border-radius:999px;padding:13px 22px;font-size:13.5px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:9px;}
+  .exportbtn:hover{opacity:.9}
+  /* ===== grid + cards ===== */
+  .grid{display:grid;grid-template-columns:repeat(12,1fr);gap:16px;}
+  .c2{grid-column:span 2}.c3{grid-column:span 3}.c4{grid-column:span 4}.c5{grid-column:span 5}
+  .c6{grid-column:span 6}.c7{grid-column:span 7}.c8{grid-column:span 8}.c9{grid-column:span 9}.c12{grid-column:span 12}
+  @media(max-width:1150px){.c2{grid-column:span 4}.c3{grid-column:span 6}.c4{grid-column:span 6}.c5,.c7{grid-column:span 12}.c6{grid-column:span 6}.c8,.c9{grid-column:span 12}}
+  @media(max-width:760px){.c2,.c3,.c4,.c6{grid-column:span 12}}
+  .card{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:22px;position:relative;}
+  .card.tight{padding:18px 20px;}
+  .ch{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:16px;}
+  .ch h3{font-size:16px;margin:0;font-weight:800;letter-spacing:-0.02em;}
+  .ch p{font-size:12.5px;margin:4px 0 0;color:var(--muted);font-weight:500;}
+  .star{color:var(--muted);font-weight:700;font-size:.65em;vertical-align:super;margin-left:1px;}
+  .footnote{font-size:11.5px;color:#9AA0A8;margin-top:10px;line-height:1.5;}
+  /* chips */
+  .chip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:700;padding:5px 11px;border-radius:999px;white-space:nowrap;}
+  .chip i{width:6px;height:6px;border-radius:999px;background:currentColor;display:inline-block;}
+  .ch-green{background:var(--green-soft);color:var(--green-ink);}
+  .ch-red{background:var(--red-soft);color:var(--red-ink);}
+  .ch-amber{background:var(--amber-soft);color:var(--amber-ink);}
+  .ch-blue{background:var(--blue-soft);color:var(--blue-ink);}
+  .ch-lilac{background:var(--lilac-soft);color:var(--lilac-ink);}
+  .ch-gray{background:var(--hairsoft);color:var(--muted);}
+  .ch-lime{background:var(--lime);color:var(--lime-ink);}
+  .ch-mint{background:var(--mint-soft);color:var(--mint-deep);}
+  /* hero */
+  .hero .hlabel{display:flex;align-items:center;gap:9px;font-size:13.5px;font-weight:700;color:var(--inksoft);}
+  .hero .hlabel i{width:8px;height:8px;border-radius:999px;background:var(--green);}
+  .hero .hnum{font-size:clamp(44px,4.6vw,62px);font-weight:800;letter-spacing:-0.04em;line-height:1;margin:14px 0 4px;font-feature-settings:"tnum";}
+  .hero .hunit{font-size:14px;color:var(--muted);font-weight:600;}
+  .hero .hchips{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px;}
+  /* kcard — компактная метрика */
+  .kcard{background:var(--card);border-radius:24px;box-shadow:var(--shadow);padding:20px;display:flex;flex-direction:column;gap:10px;}
+  .kcard .kt{display:flex;align-items:center;justify-content:space-between;gap:8px;font-size:13px;font-weight:600;color:var(--muted);}
+  .kcard .kv{font-size:30px;font-weight:800;letter-spacing:-0.03em;line-height:1;font-feature-settings:"tnum";}
+  .kcard .kchips{display:flex;gap:6px;flex-wrap:wrap;}
+  .kcard .kchips .chip{font-size:11px;padding:4px 9px;}
+  .kcard .knote{font-size:12px;color:var(--muted);font-weight:500;}
+  .krow{display:grid;gap:16px;margin-bottom:16px;}
+  .krow.n4{grid-template-columns:repeat(4,1fr);}
+  .krow.n5{grid-template-columns:repeat(5,1fr);}
+  .krow.n6{grid-template-columns:repeat(6,1fr);}
+  @media(max-width:1150px){.krow.n4,.krow.n5,.krow.n6{grid-template-columns:repeat(3,1fr)}}
+  @media(max-width:700px){.krow.n4,.krow.n5,.krow.n6{grid-template-columns:repeat(2,1fr)}}
+  /* pastel mp tiles */
+  .tiles{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+  @media(max-width:760px){.tiles{grid-template-columns:1fr}}
+  .tile{border-radius:20px;padding:18px;display:flex;flex-direction:column;gap:6px;}
+  .tile .tn{font-size:13.5px;font-weight:800;display:flex;align-items:center;gap:9px;}
+  .tile .tn svg{flex-shrink:0}
+  .tile .tv{font-size:26px;font-weight:800;letter-spacing:-0.03em;font-feature-settings:"tnum";}
+  .tile .ts{font-size:12px;font-weight:600;opacity:.75;}
+  .t-blue{background:var(--blue-soft);color:var(--blue-ink);}
+  .t-lilac{background:var(--lilac-soft);color:var(--lilac-ink);}
+  .t-yellow{background:var(--amber-soft);color:var(--amber-ink);}
+  /* tables */
+  table{width:100%;border-collapse:collapse;font-size:13.5px;}
+  th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.5px;color:var(--muted);font-weight:700;padding:9px 12px;border-bottom:1px solid var(--hair);}
+  td{padding:13px 12px;border-bottom:1px solid var(--hairsoft);}
+  tr:last-child td{border-bottom:none;}
+  .num{text-align:right;font-variant-numeric:tabular-nums;font-family:var(--mono);font-size:12.5px;white-space:nowrap;}
+  .row-warn td{background:var(--red-soft);}
+  .row-warn td:first-child{border-radius:12px 0 0 12px;}
+  .row-warn td:last-child{border-radius:0 12px 12px 0;}
+  .ctag{display:inline-block;font-size:10.5px;font-weight:800;padding:3px 9px;border-radius:7px;background:var(--hairsoft);color:var(--muted);letter-spacing:.3px;}
+  table.pl td{padding:11px 12px;}
+  table.pl tr.pl-sub td{background:var(--hairsoft);font-weight:800;}
+  table.pl tr.pl-sub td:first-child{border-radius:10px 0 0 10px;}
+  table.pl tr.pl-sub td:last-child{border-radius:0 10px 10px 0;}
+  table.pl tr.pl-net td{background:var(--lime);font-weight:800;color:var(--lime-ink);}
+  table.pl tr.pl-net td:first-child{border-radius:10px 0 0 10px;}
+  table.pl tr.pl-net td:last-child{border-radius:0 10px 10px 0;}
+  table.pl tr.pl-net td.num{color:var(--lime-ink);}
+  table.pl td.ded{color:var(--muted);}
+  /* feed (события / алёрты) */
+  .feed{display:flex;flex-direction:column;}
+  .fitem{display:flex;gap:14px;padding:11px 0;position:relative;cursor:default;}
+  .fitem.clk{cursor:pointer;border-radius:14px;}
+  .fitem.clk:hover{background:var(--hairsoft);margin:0 -10px;padding-left:10px;padding-right:10px;}
+  .fic{width:38px;height:38px;border-radius:999px;display:flex;align-items:center;justify-content:center;flex-shrink:0;position:relative;z-index:1;}
+  .fitem:not(:last-child) .fic::after{content:"";position:absolute;top:40px;left:50%;width:2px;height:26px;background:var(--hairsoft);}
+  .ft{flex:1;min-width:0;}
+  .ft .t1{font-size:13.5px;font-weight:700;line-height:1.35;}
+  .ft .t2{font-size:12.5px;color:var(--muted);margin-top:2px;line-height:1.4;}
+  .ftime{font-family:var(--mono);font-size:11.5px;color:var(--muted);flex-shrink:0;padding-top:2px;}
+  .f-green{background:var(--green-soft);color:var(--green-ink);}
+  .f-red{background:var(--red-soft);color:var(--red-ink);}
+  .f-amber{background:var(--amber-soft);color:var(--amber-ink);}
+  .f-blue{background:var(--blue-soft);color:var(--blue-ink);}
+  .f-ink{background:var(--ink);color:#fff;}
+  /* controls */
+  .toggle{display:flex;gap:6px;flex-wrap:wrap;}
+  .tg{border:none;background:#fff;box-shadow:var(--shadow);border-radius:999px;padding:8px 15px;font-size:12.5px;font-weight:700;color:var(--inksoft);cursor:pointer;transition:.12s;}
+  .tg:hover{background:var(--hairsoft);}
+  .tg.active{background:var(--ink);color:#fff;box-shadow:none;}
+  .sel{font-family:inherit;font-size:13px;font-weight:600;color:var(--ink);border:none;box-shadow:var(--shadow);background:#fff;border-radius:999px;padding:10px 16px;cursor:pointer;}
+  input.sel{cursor:text;}
+  .btn{font-family:inherit;font-size:13px;font-weight:700;color:#fff;background:var(--ink);border:none;border-radius:999px;padding:11px 19px;cursor:pointer;display:inline-flex;align-items:center;gap:8px;}
+  .btn:hover{opacity:.9}
+  .btn.lime{background:var(--lime);color:var(--lime-ink);}
+  input[type=range]{width:100%;accent-color:var(--ink);height:6px;}
+  /* recs */
+  .rec{display:flex;gap:12px;align-items:flex-start;padding:13px 15px;border-radius:16px;background:var(--hairsoft);font-size:13px;line-height:1.45;margin-bottom:9px;font-weight:500;}
+  .rec:last-child{margin-bottom:0;}
+  .rec .rtag{font-size:10px;font-weight:800;letter-spacing:.4px;padding:4px 9px;border-radius:8px;flex-shrink:0;white-space:nowrap;margin-top:1px;}
+  /* compbar (юнит-экономика) */
+  .compbar{display:flex;height:44px;border-radius:14px;overflow:hidden;margin:12px 0;}
+  .compbar .seg{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11.5px;font-weight:800;min-width:0;white-space:nowrap;overflow:hidden;}
+  .leg{display:flex;gap:16px;flex-wrap:wrap;font-size:12.5px;margin-top:6px;}
+  .leg span{display:flex;align-items:center;gap:7px;color:var(--muted);font-weight:600;}
+  .leg i{width:11px;height:11px;border-radius:4px;display:inline-block;}
+  /* mini stat cells */
+  .cells{display:grid;gap:12px;}
+  .cell{background:var(--hairsoft);border-radius:16px;padding:14px 16px;}
+  .cell .l{font-size:12px;color:var(--muted);font-weight:600;}
+  .cell .b{font-size:22px;font-weight:800;margin-top:5px;letter-spacing:-0.02em;font-feature-settings:"tnum";}
+  .cell .d{font-size:12px;font-weight:600;margin-top:3px;color:var(--muted);}
+  /* chain */
+  .chain{display:flex;align-items:stretch;gap:0;flex-wrap:wrap;}
+  .cnode{flex:1;min-width:210px;border-radius:18px;padding:18px;cursor:pointer;transition:.18s;border:2px solid transparent;}
+  .carrow{display:flex;align-items:center;justify-content:center;width:44px;font-size:20px;color:#C2C7CF;}
+  .cnode h4{margin:0 0 6px;font-size:14px;font-weight:800;}
+  .cnode p{margin:0;font-size:12.5px;line-height:1.45;color:var(--muted);font-weight:500;}
+  .cnode .tag{font-size:10.5px;font-weight:800;letter-spacing:.5px;}
+  .cn-a{background:var(--lilac-soft);} .cn-a.hot{border-color:var(--lilac);}
+  .cn-b{background:var(--blue-soft);} .cn-b.hot{border-color:var(--blue);}
+  .cn-c{background:var(--amber-soft);} .cn-c.hot{border-color:var(--amber);}
+  /* inbox (коммуникация) */
+  .inbox{display:grid;grid-template-columns:250px 360px 1fr;gap:16px;align-items:start;}
+  @media(max-width:1150px){.inbox{grid-template-columns:1fr}}
+  .chanlist{display:flex;flex-direction:column;gap:4px;}
+  .chan{display:flex;align-items:center;gap:11px;padding:11px 13px;border-radius:14px;border:none;background:transparent;cursor:pointer;font-size:13.5px;font-weight:700;color:var(--inksoft);text-align:left;width:100%;}
+  .chan:hover{background:var(--hairsoft);}
+  .chan.active{background:var(--ink);color:#fff;}
+  .chan .cic{width:34px;height:34px;border-radius:11px;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+  .chan .cnt{margin-left:auto;font-family:var(--mono);font-size:11.5px;font-weight:700;background:var(--hairsoft);color:var(--muted);border-radius:999px;padding:2px 9px;}
+  .chan.active .cnt{background:rgba(255,255,255,.18);color:#fff;}
+  .chanhdr{font-size:10.5px;font-weight:800;letter-spacing:.6px;color:var(--muted);padding:14px 13px 6px;}
+  .dlg{padding:14px;border-radius:16px;cursor:pointer;border-left:3px solid transparent;}
+  .dlg:hover{background:var(--hairsoft);}
+  .dlg.active{background:var(--hairsoft);border-left-color:var(--ink);}
+  .dlg .dh{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .dlg .dh b{font-size:13.5px;}
+  .dlg .dh span{font-family:var(--mono);font-size:11px;color:var(--muted);}
+  .dlg .ds{font-size:13px;font-weight:700;margin-top:3px;}
+  .dlg .dp{font-size:12.5px;color:var(--muted);margin-top:3px;line-height:1.4;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .dlg .dtags{display:flex;gap:6px;margin-top:8px;flex-wrap:wrap;}
+  .thread{display:flex;flex-direction:column;min-height:480px;}
+  .thr-head{display:flex;align-items:center;gap:13px;padding-bottom:16px;border-bottom:1px solid var(--hairsoft);flex-wrap:wrap;}
+  .thr-ava{width:46px;height:46px;border-radius:999px;display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;flex-shrink:0;}
+  .thr-head .tn{font-size:16px;font-weight:800;}
+  .thr-head .ts{font-size:12.5px;color:var(--muted);font-weight:600;}
+  .bubble{background:var(--hairsoft);border-radius:18px;padding:15px 18px;font-size:13.5px;line-height:1.55;max-width:560px;margin-top:16px;font-weight:500;}
+  .bub-meta{font-size:11.5px;color:var(--muted);font-weight:600;margin-top:14px;}
+  .yourturn{text-align:center;color:var(--muted);font-size:12px;font-weight:600;margin:auto 0 18px;padding-top:30px;}
+  .thr-actions{display:flex;gap:9px;flex-wrap:wrap;border-top:1px solid var(--hairsoft);padding-top:15px;}
+  .act{border:none;border-radius:999px;padding:11px 17px;font-size:13px;font-weight:700;cursor:pointer;background:#fff;box-shadow:var(--shadow);color:var(--ink);display:inline-flex;align-items:center;gap:8px;}
+  .act.lime{background:var(--lime);color:var(--lime-ink);box-shadow:none;}
+  /* misc */
+  .insight{background:var(--mint-soft);color:var(--mint-deep);font-size:13px;font-weight:700;padding:12px 16px;border-radius:14px;margin-top:12px;}
+  .grouphdr{font-size:10.5px;font-weight:800;text-transform:uppercase;letter-spacing:.6px;color:var(--muted);margin:18px 0 8px;}
+  .slidehead{display:flex;justify-content:space-between;align-items:baseline;gap:12px;flex-wrap:wrap;}
+  .slidehead .big{font-size:30px;font-weight:800;letter-spacing:-0.03em;}
+  .pgnote{text-align:center;font-size:11.5px;color:#9AA0A8;margin-top:30px;line-height:1.5;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel" data-presets="react">
+/* ========== РЕАЛЬНЫЕ ДАННЫЕ ========== */
+const PL = { revenue:240.5, cogs:166.0, grossProfit:74.5, grossPct:31.0,
+  commissions:32.2, commissionsPct:13.4, adminCosts:26.7, adminPct:11.1,
+  ebitda:15.6, ebitdaPct:6.5, financialCosts:5.3, finPct:2.2,
+  pretax:11.1, pretaxPct:4.6, tax:2.8, taxPct:1.2, netProfit:8.34, netPct:3.5 };
+const PL_MONTHLY = [
+  { month:"Январь", revenue:46.3, gross:13.6, ebitda:2.6, pretax:1.5, net:1.1, netMargin:2.5 },
+  { month:"Февраль", revenue:58.7, gross:18.6, ebitda:7.0, pretax:6.2, net:4.6, netMargin:7.9 },
+  { month:"Март", revenue:68.5, gross:21.2, ebitda:1.0, pretax:-0.2, net:-0.1, netMargin:-0.2 },
+  { month:"Апрель", revenue:67.0, gross:21.1, ebitda:5.0, pretax:3.6, net:2.7, netMargin:4.1 },
+];
+const MARGIN_LEVELS = [
+  { level:"EBITDA (операционная)", value:6.5, note:"до финрасходов и налога" },
+  { level:"Рентабельность до налога", value:4.6, note:"после процентов, факторинга" },
+  { level:"Чистая прибыль", value:3.5, note:"после налога" },
+];
+const OZON = [
+  { month:"Июн25", gmv:5.5, payout:2.7, held:51 }, { month:"Сен25", gmv:12.0, payout:5.6, held:53 },
+  { month:"Дек25", gmv:30.9, payout:10.9, held:65 }, { month:"Мар26", gmv:40.3, payout:14.5, held:64 },
+  { month:"Апр26", gmv:43.0, payout:12.7, held:70 }, { month:"Май26", gmv:39.3, payout:10.8, held:73 },
+];
+const WB = [
+  { month:"Июн25", gmv:1.6, payout:1.0, held:34 }, { month:"Сен25", gmv:3.2, payout:2.4, held:24 },
+  { month:"Мар26", gmv:13.0, payout:8.3, held:36 }, { month:"Апр26", gmv:12.4, payout:7.1, held:43 },
+  { month:"Май26", gmv:11.2, payout:6.3, held:43 },
+];
+const YANDEX = [
+  { month:"Июн25", gmv:0.46, payout:0.24, held:48 }, { month:"Сен25", gmv:0.47, payout:0.21, held:55 },
+  { month:"Дек25", gmv:0.97, payout:0.22, held:77 }, { month:"Мар26", gmv:1.84, payout:0.34, held:82 },
+  { month:"Апр26", gmv:2.06, payout:0.33, held:84 }, { month:"Май26", gmv:3.58, payout:1.17, held:67 },
+];
+const REVENUE_12M = [
+  { month:"Июн25", ozon:5.5, wb:1.6, yandex:0.5 },
+  { month:"Июл25", ozon:7.0, wb:2.0, yandex:0.5, gen:true },
+  { month:"Авг25", ozon:9.5, wb:2.6, yandex:0.6, gen:true },
+  { month:"Сен25", ozon:12.0, wb:3.2, yandex:0.5 },
+  { month:"Окт25", ozon:18.0, wb:5.0, yandex:0.7, gen:true },
+  { month:"Ноя25", ozon:24.0, wb:8.0, yandex:0.9, gen:true },
+  { month:"Дек25", ozon:30.9, wb:11.0, yandex:1.0 },
+  { month:"Янв26", ozon:33.0, wb:9.5, yandex:1.1, gen:true },
+  { month:"Фев26", ozon:38.0, wb:11.0, yandex:1.5, gen:true },
+  { month:"Мар26", ozon:40.3, wb:13.0, yandex:1.8 },
+  { month:"Апр26", ozon:43.0, wb:12.4, yandex:2.1 },
+  { month:"Май26", ozon:39.3, wb:11.2, yandex:3.6 },
+];
+const OZON_ADS = [
+  { month:"Июн25", ads:0.6 }, { month:"Сен25", ads:1.6 }, { month:"Дек25", ads:4.5 },
+  { month:"Мар26", ads:6.6 }, { month:"Апр26", ads:7.3 }, { month:"Май26", ads:6.8 },
+];
+/* единые статьи удержаний для всех площадок (одинаковый набор и порядок) */
+const heldStatus=(p)=> p>=30?"critical":p>=10?"alert":"normal";
+const OZON_BREAKDOWN = [
+  { type:"Комиссия площадки", sum:13.77, pct:35.0 },
+  { type:"Логистика", sum:5.93, pct:15.1 },
+  { type:"Реклама и продвижение", sum:6.84, pct:17.4 },
+  { type:"Хранение", sum:0.69, pct:1.8 },
+  { type:"Приёмка / эквайринг", sum:0.82, pct:2.1 },
+  { type:"Прочее / штрафы", sum:0.46, pct:1.2 },
+].map(r=>({...r,status:heldStatus(r.pct)}));
+const WB_BREAKDOWN = [
+  { type:"Комиссия площадки", sum:1.50, pct:2.1 },
+  { type:"Логистика", sum:14.50, pct:20.4 },
+  { type:"Реклама и продвижение", sum:7.90, pct:11.1 },
+  { type:"Хранение", sum:0.62, pct:0.9 },
+  { type:"Приёмка / эквайринг", sum:0.09, pct:0.1 },
+  { type:"Прочее / штрафы", sum:0.05, pct:0.1 },
+].map(r=>({...r,status:heldStatus(r.pct)}));
+const YANDEX_BREAKDOWN = [
+  { type:"Комиссия площадки", sum:3.11, pct:19.3 },
+  { type:"Логистика", sum:3.41, pct:21.2 },
+  { type:"Реклама и продвижение", sum:4.01, pct:24.9 },
+  { type:"Хранение", sum:0.36, pct:2.2 },
+  { type:"Приёмка / эквайринг", sum:0.31, pct:1.9 },
+  { type:"Прочее / штрафы", sum:0.00, pct:0.0 },
+].map(r=>({...r,status:heldStatus(r.pct)}));
+const PLATFORMS = [
+  { name:"Ozon", heldMonth:73, heldYear:64, gmvMonth:39.3, note:"крупнейший канал, удержания растут" },
+  { name:"Wildberries", heldMonth:43, heldYear:36, gmvMonth:11.2, note:"выгоднее, тренд тот же" },
+  { name:"Яндекс Маркет", heldMonth:67, heldYear:69, gmvMonth:3.58, note:"дорогой, волатильный, растёт ×6,6" },
+];
+const MP_KPI = { gmvMonth:54.1, gmvDelta:-6, payoutMonth:18.3,
+  avgHeld:66, avgHeldDelta:2, ozonHeld:73, wbHeld:43, yandexHeld:67, adBudget:8.0, adGrowthTimes:11 };
+const AD_BUDGET_BY_PLATFORM = [
+  { platform:"Ozon", monthly:6.8, mom:-7, yoy:980 },
+  { platform:"Wildberries", monthly:0.66, mom:3, yoy:120 },
+  { platform:"Яндекс Маркет", monthly:0.4, mom:5, yoy:90 },
+];
+const CHANNELS = [
+  { name:"E-com (Ozon, WB, ЯМ)", revenue:365, share:71 },
+  { name:"Федеральные сети", revenue:85, share:16 },
+  { name:"Дистрибуция", revenue:37, share:7 },
+  { name:"Экспорт", revenue:15, share:3 },
+  { name:"Прочее", revenue:14, share:3 },
+];
+const ECOM_FLOW = { shipShare:71, cashShare:30, cashSum:153 };
+const GROWTH_YOY = { pct:67, from:144, to:240, period:"янв-апр 26 к 25" };
+const BRAND_MARGIN = { avg:33.5, min:19, max:54, checkedSKU:80, unprofitable:0 };
+const PRODUCTION = { units:1.5, batches:1617, downtimePct:5.3, downtimeHours:111, totalHours:2094, skuCount:400,
+  downtimeByLine:[ {line:"Самокат",hours:73},{line:"Озон",hours:35},{line:"Фасовка",hours:4},{line:"Нотис",hours:0},{line:"Досонг",hours:0} ] };
+const PAYROLL = { monthly:9.75, yearly2025:115, production4m:21.9, admin4m:23.4 };
+const FACTORING = { commission4m:1.6, interest4m:1.88, total4m:3.5 };
+
+/* ========== СГЕНЕРИРОВАННЫЕ ДАННЫЕ (*) ========== */
+const MAIN_KPI_GEN = { revenueMom:-6, revenueYoy:34,
+  netProfit:1.9, netProfitMom:4, netProfitYoy:28,
+  margin:21.5, marginMom:-1.2, marginYoy:2.4,
+  orders:4481, ordersMom:12, ordersYoy:41,
+  avgCheck:326, avgCheckMom:-3, avgCheckYoy:-2,
+  wbReturnPct:20.6, wbReturnMom:1.3, wbReturnYoy:3.1 };
+const MARGIN_BY_CHANNEL_GEN = [
+  { channel:"Ozon", prev:26.1, cur:27.4, year:31.0 },
+  { channel:"Wildberries", prev:23.4, cur:24.1, year:27.3 },
+  { channel:"Яндекс", prev:19.2, cur:18.6, year:22.0 },
+];
+const TOP_SKU_GEN = [
+  { sku:"Куркума молотая 250г", channel:"OZON", revenue:1134602, orders:452, margin:34.2 },
+  { sku:"Паприка копчёная 200г", channel:"OZON", revenue:903347, orders:349, margin:33.1 },
+  { sku:"Хмели-сунели 180г", channel:"OZON", revenue:623129, orders:289, margin:31.8 },
+  { sku:"Смесь для плова 220г", channel:"OZON", revenue:527180, orders:411, margin:29.6 },
+  { sku:"Куркума молотая 250г", channel:"WB", revenue:455588, orders:258, margin:27.4 },
+];
+const ABC_MATRIX_GEN = [
+  { n:1, sku:"Куркума молотая 250г", cat:"Моно-специи", channel:"OZON", orders:452, revenue:1134602, margin:34.2, abc:"A" },
+  { n:2, sku:"Паприка копчёная 200г", cat:"Моно-специи", channel:"OZON", orders:349, revenue:903347, margin:33.1, abc:"A" },
+  { n:3, sku:"Хмели-сунели 180г", cat:"Смеси", channel:"OZON", orders:289, revenue:623129, margin:31.8, abc:"A" },
+  { n:4, sku:"Приправа для курицы 330г", cat:"Смеси", channel:"OZON", orders:217, revenue:545551, margin:30.4, abc:"A" },
+  { n:5, sku:"Перец чёрный горошек 135г", cat:"Перцы", channel:"OZON", orders:193, revenue:484450, margin:29.7, abc:"A" },
+  { n:6, sku:"Куркума молотая 250г", cat:"Моно-специи", channel:"WB", orders:258, revenue:455588, margin:27.4, abc:"A" },
+  { n:7, sku:"Смесь для плова 220г", cat:"Смеси", channel:"OZON", orders:224, revenue:484813, margin:31.1, abc:"A" },
+  { n:8, sku:"Лавровый лист 20г", cat:"Моно-специи", channel:"OZON", orders:411, revenue:327180, margin:28.9, abc:"A" },
+  { n:9, sku:"Паприка молотая 200г", cat:"Моно-специи", channel:"OZON", orders:198, revenue:340468, margin:30.2, abc:"A" },
+  { n:10, sku:"Чеснок сушёный 140г", cat:"Моно-специи", channel:"WB", orders:187, revenue:274288, margin:25.1, abc:"B" },
+];
+const SKU_BY_CHANNEL_GEN = [
+  { sku:"Куркума молотая 250г", wb:1750, ozon:2510 },
+  { sku:"Смесь для плова 220г", wb:960, ozon:1290 },
+  { sku:"Паприка копчёная 200г", wb:2360, ozon:2580 },
+];
+const RETURNS_GEN = [
+  { sku:"Хмели-сунели 180г", channel:"WB", sold:89, returned:31, pct:34.8, trend:"up", status:"critical" },
+  { sku:"Чеснок сушёный 140г", channel:"WB", sold:187, returned:58, pct:31.0, trend:"flat", status:"critical" },
+  { sku:"Паприка копчёная 200г", channel:"WB", sold:142, returned:38, pct:26.8, trend:"up", status:"critical" },
+  { sku:"Перец чёрный горошек 135г", channel:"WB", sold:201, returned:49, pct:24.4, trend:"flat", status:"alert" },
+  { sku:"Смесь для плова 220г", channel:"WB", sold:411, returned:82, pct:19.9, trend:"down", status:"alert" },
+  { sku:"Куркума молотая 250г", channel:"OZON", sold:452, returned:18, pct:4.0, trend:"flat", status:"ok" },
+  { sku:"Хмели-сунели 180г", channel:"OZON", sold:289, returned:9, pct:3.1, trend:"down", status:"ok" },
+];
+const CATEGORY_SALES_GEN = [
+  { month:"Дек25", monoSpices:2.8, blends:1.4, peppers:0.6, sets:0.4 },
+  { month:"Янв26", monoSpices:2.2, blends:1.1, peppers:0.5, sets:0.4 },
+  { month:"Фев26", monoSpices:2.0, blends:1.3, peppers:0.6, sets:0.3 },
+  { month:"Мар26", monoSpices:1.9, blends:1.0, peppers:0.5, sets:0.5 },
+  { month:"Апр26", monoSpices:2.4, blends:0.9, peppers:0.4, sets:0.3 },
+  { month:"Май26", monoSpices:2.5, blends:0.8, peppers:0.4, sets:0.4 },
+];
+const AD_CAMPAIGNS_GEN = [
+  { name:"Приправы — поиск", platform:"OZON", spend:340, revenue:920, drr:37.0, status:"critical" },
+  { name:"Моно-специи — карточки", platform:"OZON", spend:210, revenue:1240, drr:16.9, status:"ok" },
+  { name:"Корзина — авто", platform:"OZON", spend:168, revenue:390, drr:43.1, status:"critical" },
+  { name:"Смеси — поиск", platform:"WB", spend:95, revenue:420, drr:22.6, status:"alert" },
+  { name:"Буст продаж", platform:"Яндекс", spend:120, revenue:510, drr:23.5, status:"alert" },
+];
+const DRR_DAILY_GEN = Array.from({length:30},(_,i)=>({ day:i+1, drr:+(6 + Math.sin(i/4)*2 + (i>22?2:0)).toFixed(1) }));
+const DRR_BY_SKU_GEN = [
+  { sku:"Чеснок сушёный 140г", adSpend:210, revenue:480, drr:43.8, margin:22, status:"critical" },
+  { sku:"Перец чёрный горошек 135г", adSpend:168, revenue:390, drr:43.1, margin:25, status:"critical" },
+  { sku:"Паприка копчёная 200г", adSpend:145, revenue:420, drr:34.5, margin:28, status:"alert" },
+  { sku:"Куркума молотая 250г", adSpend:89, revenue:510, drr:17.5, margin:31, status:"ok" },
+  { sku:"Лавровый лист 20г", adSpend:32, revenue:290, drr:11.0, margin:35, status:"ok" },
+];
+const SKU_MARGIN_AFTER_MP_GEN = [
+  { sku:"Паприка молотая 200г", cost:78, price:136, payout:98, marginAfterMP:20.4, status:"ok" },
+  { sku:"Лавровый лист 20г", cost:61, price:106, payout:79, marginAfterMP:22.6, status:"ok" },
+  { sku:"Куркума молотая 250г", cost:91, price:136, payout:95, marginAfterMP:4.4, status:"alert" },
+  { sku:"Чеснок сушёный 140г", cost:82, price:110, payout:74, marginAfterMP:-9.8, status:"loss" },
+];
+const STOCK_GEN = [
+  { sku:"Паприка копчёная 200г", channel:"WB", stock:340, daysToZero:12, status:"critical" },
+  { sku:"Куркума молотая 250г", channel:"OZON", stock:1820, daysToZero:64, status:"ok" },
+  { sku:"Хмели-сунели 180г", channel:"OZON", stock:560, daysToZero:28, status:"alert" },
+  { sku:"Чеснок сушёный 140г", channel:"WB", stock:210, daysToZero:9, status:"critical" },
+  { sku:"Смесь для плова 220г", channel:"OZON", stock:1240, daysToZero:88, status:"ok" },
+];
+const TURNOVER_GEN = [
+  { month:"Дек25", days:120 }, { month:"Янв26", days:138 }, { month:"Фев26", days:152 },
+  { month:"Мар26", days:160 }, { month:"Апр26", days:168 }, { month:"Май26", days:174 },
+];
+const SHIPMENT_TASK_GEN = [
+  { sku:"Паприка копчёная 200г", channel:"WB", warehouse:"Белая Дача", qty:200, deadline:"7 дней", urgency:"critical" },
+  { sku:"Чеснок сушёный 140г", channel:"WB", warehouse:"Коледино", qty:150, deadline:"5 дней", urgency:"critical" },
+  { sku:"Хмели-сунели 180г", channel:"OZON", warehouse:"Хоругвино", qty:120, deadline:"10 дней", urgency:"alert" },
+];
+/* риск запасов: что заканчивается и что залежалось (заморожены оборотные средства) * */
+const STOCK_RISK_GEN = [
+  { sku:"Чеснок сушёный 140г", channel:"WB", stock:210, perDay:23, daysToZero:9, frozen:0.42, reorderBy:"до 11.06", status:"low" },
+  { sku:"Паприка копчёная 200г", channel:"WB", stock:340, perDay:28, daysToZero:12, frozen:0.68, reorderBy:"до 13.06", status:"low" },
+  { sku:"Хмели-сунели 180г", channel:"OZON", stock:560, perDay:20, daysToZero:28, frozen:0.89, reorderBy:"до 25.06", status:"ok" },
+  { sku:"Куркума молотая 250г", channel:"OZON", stock:1820, perDay:28, daysToZero:64, frozen:2.55, reorderBy:"до 28.07", status:"ok" },
+  { sku:"Смесь для плова 220г", channel:"OZON", stock:1240, perDay:14, daysToZero:88, frozen:1.42, reorderBy:"до 20.08", status:"ok" },
+  { sku:"Лавровый лист 20г", channel:"OZON", stock:3200, perDay:9, daysToZero:355, frozen:1.95, reorderBy:"не заказывать", status:"overstock" },
+  { sku:"Кориандр молотый 150г", channel:"WB", stock:2100, perDay:6, daysToZero:350, frozen:1.68, reorderBy:"не заказывать", status:"overstock" },
+];
+const ALERTS_GEN = [
+  { type:"critical", text:"Паприка копчёная на WB — остаток 12 дней до нуля", go:["stock"] },
+  { type:"critical", text:"ДРР Ozon вчера — 9,3% (порог 8%)", go:["ads"] },
+  { type:"alert", text:"% возврата Хмели-сунели — 28% за 14 дней", go:["products"] },
+  { type:"alert", text:"Оборачиваемость Ozon выросла до 174 дней", go:["stock"] },
+  { type:"ok", text:"Поставка WB подтверждена на 16 июня", go:null },
+];
+const AI_RECS_GEN = [
+  { tag:"ЦЕНА", tone:"green", text:"Снижение цены Куркума 250г на 15 ₽ прогнозирует рост заказов на 22% при сохранении положительной маржи." },
+  { tag:"СКЛАД", tone:"amber", text:"По Паприка копчёная на WB (склад Белая Дача) рекомендуется отгрузка 200 ед. в течение 7 дней." },
+  { tag:"РЕКЛАМА", tone:"red", text:"ДРР Ozon превысил целевой уровень вчера. Рекомендуется снизить ставку по кампании «Приправы» на 15%." },
+];
+
+/* рейтинги SKU * */
+const SKU_FULL_GEN = [
+  { sku:"Куркума молотая 250г", channel:"OZON", revenue:1134602, margin:34.2 },
+  { sku:"Паприка копчёная 200г", channel:"OZON", revenue:903347, margin:33.1 },
+  { sku:"Хмели-сунели 180г", channel:"OZON", revenue:623129, margin:31.8 },
+  { sku:"Приправа для курицы 330г", channel:"OZON", revenue:545551, margin:30.4 },
+  { sku:"Смесь для плова 220г", channel:"OZON", revenue:484813, margin:31.1 },
+  { sku:"Перец чёрный горошек 135г", channel:"OZON", revenue:484450, margin:24.5 },
+  { sku:"Куркума молотая 250г", channel:"WB", revenue:455588, margin:27.4 },
+  { sku:"Паприка молотая 200г", channel:"OZON", revenue:340468, margin:36.0 },
+  { sku:"Лавровый лист 20г", channel:"OZON", revenue:327180, margin:38.5 },
+  { sku:"Чеснок сушёный 140г", channel:"WB", revenue:274288, margin:19.2 },
+  { sku:"Кориандр молотый 150г", channel:"WB", revenue:142500, margin:22.0 },
+  { sku:"Зира семена 100г", channel:"OZON", revenue:128900, margin:35.4 },
+  { sku:"Смесь для глинтвейна 90г", channel:"WB", revenue:96400, margin:41.0 },
+  { sku:"Имбирь молотый 120г", channel:"OZON", revenue:88200, margin:17.5 },
+];
+/* юнит-экономика по SKU, ₽ за единицу * */
+const UNIT_ECON_GEN = [
+  { sku:"Паприка молотая 200г", price:136, cost:78, commission:22, logistics:9, ads:5, acquiring:2, volume:198 },
+  { sku:"Куркума молотая 250г", price:136, cost:91, commission:25, logistics:9, ads:5, acquiring:2, volume:452 },
+  { sku:"Лавровый лист 20г", price:106, cost:61, commission:17, logistics:5, ads:3, acquiring:2, volume:411 },
+  { sku:"Хмели-сунели 180г", price:159, cost:88, commission:28, logistics:15, ads:12, acquiring:4, volume:289 },
+  { sku:"Чеснок сушёный 140г", price:110, cost:82, commission:19, logistics:8, ads:7, acquiring:2, volume:187 },
+  { sku:"Перец чёрный горошек 135г", price:152, cost:95, commission:27, logistics:14, ads:16, acquiring:4, volume:193 },
+];
+/* сравнение по каналам — операц. прибыль ₽/ед * */
+const CHANNEL_SKU_GEN = [
+  { sku:"Куркума молотая 250г", wb:1750, ozon:2510 },
+  { sku:"Смесь для плова 220г", wb:960, ozon:1290 },
+  { sku:"Паприка копчёная 200г", wb:2360, ozon:2580 },
+  { sku:"Хмели-сунели 180г", wb:1480, ozon:1920 },
+  { sku:"Лавровый лист 20г", wb:680, ozon:910 },
+];
+const CATEGORY_CHANNEL_GEN = [
+  { category:"Моно-специи", wb:1750, ozon:2510 },
+  { category:"Смеси", wb:960, ozon:1290 },
+  { category:"Перцы", wb:1180, ozon:1560 },
+  { category:"Наборы", wb:1420, ozon:1880 },
+];
+/* прогноз продаж на месяц (июнь 2026), млн ₽ * */
+const MONTH_FORECAST_GEN = [
+  { category:"Моно-специи", low:2.3, base:2.6, high:2.9 },
+  { category:"Смеси", low:0.7, base:0.9, high:1.1 },
+  { category:"Перцы", low:0.35, base:0.45, high:0.55 },
+  { category:"Наборы", low:0.3, base:0.4, high:0.5 },
+];
+
+/* реклама — динамика бюджета по площадкам, млн ₽/мес * */
+const ADS_MONTHLY_GEN = [
+  { month:"Июн25", ozon:0.6, wb:0.15, yandex:0.05 },
+  { month:"Сен25", ozon:1.6, wb:0.35, yandex:0.10 },
+  { month:"Дек25", ozon:4.5, wb:0.55, yandex:0.22 },
+  { month:"Мар26", ozon:6.6, wb:0.60, yandex:0.34 },
+  { month:"Апр26", ozon:7.3, wb:0.64, yandex:0.38 },
+  { month:"Май26", ozon:6.8, wb:0.66, yandex:0.40 },
+];
+/* ДРР по дням — WB и OZON, % * */
+const DRR_DAILY2_GEN = Array.from({length:30},(_,i)=>({
+  day:i+1,
+  wb:+(5 + Math.sin(i/5)*0.6 + (i>24?0.6:0)).toFixed(1),
+  ozon:+(6 + Math.sin(i/4)*1.6 + (i>20?2:0)).toFixed(1),
+}));
+/* ДРР по площадкам с динамикой, % * */
+const AD_DRR_PLATFORM_GEN = [
+  { platform:"Ozon", drr:14.2, mom:1.8, yoy:6.4 },
+  { platform:"Wildberries", drr:9.6, mom:-0.4, yoy:3.1 },
+  { platform:"Яндекс Маркет", drr:11.8, mom:0.9, yoy:4.7 },
+  { platform:"Все площадки", drr:13.1, mom:1.2, yoy:5.6 },
+];
+/* оборот по площадкам + поступления, млн ₽/мес * */
+const MP_OBOROT_GEN = [
+  { month:"Июн25", ozon:5.5, wb:1.6, yandex:0.46, payout:3.9 },
+  { month:"Сен25", ozon:12.0, wb:3.2, yandex:0.47, payout:8.2 },
+  { month:"Дек25", ozon:30.9, wb:11.0, yandex:0.97, payout:18.0 },
+  { month:"Мар26", ozon:40.3, wb:13.0, yandex:1.84, payout:23.1 },
+  { month:"Апр26", ozon:43.0, wb:12.4, yandex:2.06, payout:20.1 },
+  { month:"Май26", ozon:39.3, wb:11.2, yandex:3.58, payout:18.3 },
+];
+/* оборачиваемость по площадкам, дней * */
+const TURNOVER_MULTI_GEN = [
+  { month:"Дек25", ozon:120, wb:96, yandex:140 },
+  { month:"Янв26", ozon:138, wb:104, yandex:150 },
+  { month:"Фев26", ozon:152, wb:112, yandex:158 },
+  { month:"Мар26", ozon:160, wb:120, yandex:165 },
+  { month:"Апр26", ozon:168, wb:128, yandex:172 },
+  { month:"Май26", ozon:174, wb:134, yandex:178 },
+];
+const TURNOVER_TARGET = 60;
+
+/* мониторинг цен конкурентов * */
+const COMPETITOR_PRICES_GEN = [
+  { sku:"Куркума молотая 250г", our:136, items:[
+    { seller:"SpiceLab", mp:"OZON", price:129, prev:142, trend:-9.2, dumping:true },
+    { seller:"Восточный базар", mp:"OZON", price:148, prev:149, trend:-0.7, dumping:false },
+    { seller:"PriPravka", mp:"WB", price:151, prev:151, trend:0, dumping:false },
+  ]},
+  { sku:"Паприка копчёная 200г", our:189, items:[
+    { seller:"SpiceLab", mp:"OZON", price:196, prev:198, trend:-1.0, dumping:false },
+    { seller:"Дом специй", mp:"WB", price:172, prev:191, trend:-9.9, dumping:true },
+    { seller:"GurmanShop", mp:"ЯМ", price:204, prev:204, trend:0, dumping:false },
+  ]},
+  { sku:"Хмели-сунели 180г", our:159, items:[
+    { seller:"Восточный базар", mp:"OZON", price:163, prev:165, trend:-1.2, dumping:false },
+    { seller:"PriPravka", mp:"WB", price:158, prev:160, trend:-1.3, dumping:false },
+  ]},
+  { sku:"Перец чёрный горошек 135г", our:152, items:[
+    { seller:"SpiceLab", mp:"OZON", price:144, prev:146, trend:-1.4, dumping:false },
+    { seller:"Дом специй", mp:"WB", price:149, prev:150, trend:-0.7, dumping:false },
+    { seller:"GurmanShop", mp:"ЯМ", price:160, prev:162, trend:-1.2, dumping:false },
+  ]},
+];
+/* динамика цен за 8 недель: мы + 2 главных конкурента (Куркума 250г) * */
+const PRICE_HISTORY_GEN = [
+  { week:"Нед 1", our:139, spicelab:144, vostok:150 },
+  { week:"Нед 2", our:139, spicelab:143, vostok:150 },
+  { week:"Нед 3", our:136, spicelab:142, vostok:149 },
+  { week:"Нед 4", our:136, spicelab:142, vostok:149 },
+  { week:"Нед 5", our:136, spicelab:141, vostok:148 },
+  { week:"Нед 6", our:136, spicelab:138, vostok:148 },
+  { week:"Нед 7", our:136, spicelab:133, vostok:148 },
+  { week:"Нед 8", our:136, spicelab:129, vostok:148 },
+];
+const DUMPING_ALERTS_GEN = [
+  { type:"critical", text:"SpiceLab снизил цену на «Куркума молотая 250г» до 129 ₽ (−9% за неделю) — демпинг, мы дороже на 5%", sub:"Ozon · порог −5% за 7 дней · уведомление отправлено в Telegram", time:"08:02" },
+  { type:"critical", text:"«Дом специй» уронил «Паприка копчёная 200г» до 172 ₽ (−10%) — мы дороже на 10%", sub:"Wildberries · порог −5% за 7 дней · уведомление отправлено в Telegram", time:"вчера" },
+  { type:"ok", text:"По остальным 14 отслеживаемым позициям резких снижений нет", sub:"средний разрыв с конкурентами +2,4% — в норме", time:"вчера" },
+];
+
+/* этап 2-3 — сгенерированные (*) */
+const STM_MARGIN_GEN = [
+  { network:"Перекрёсток", skuCount:110, avgMargin:8, status:"low" },
+  { network:"Лента", skuCount:104, avgMargin:12, status:"low" },
+  { network:"X5", skuCount:34, avgMargin:11, status:"low" },
+  { network:"Самокат", skuCount:60, avgMargin:15, status:"ok" },
+  { network:"Вкусвилл", skuCount:35, avgMargin:18, status:"ok" },
+];
+const DEFECTS_GEN = [
+  { reason:"Этикетка", count:1240, costRub:95, status:"critical" },
+  { reason:"Крышка", count:680, costRub:41, status:"alert" },
+  { reason:"Масса", count:320, costRub:28, status:"alert" },
+  { reason:"Дата выпуска", count:150, costRub:12, status:"normal" },
+];
+const EVENTS_GEN = [
+  { from:"Продажи", time:"09:14", text:"Промо по «Приправа для курицы 330г» с 15.06, объём +40% — проверьте сырьё и мощности" },
+  { from:"Склад", time:"11:32", text:"Этикетки для «Куркума 250г» заканчиваются — под угрозой заказ на 18.06" },
+  { from:"Система", time:"14:00", text:"План производства на неделю сформирован, ожидает подтверждения мастера" },
+];
+const PRICE_SIM_GEN = { product:"Паприка молотая 200г", basePrice:136, baseCost:91, baseVolume:12000, elasticity:-1.2 };
+const DEMAND_FORECAST_GEN = [
+  { month:"Янв26", actual:46.3 }, { month:"Фев26", actual:58.7 }, { month:"Мар26", actual:68.5 },
+  { month:"Апр26", actual:67.0 }, { month:"Май26", forecast:64, low:59, high:69 },
+  { month:"Июн26", forecast:66, low:60, high:72 }, { month:"Июл26", forecast:70, low:63, high:77 },
+];
+const PURCHASE_FORECAST_GEN = [
+  { material:"Перец чёрный (импорт)", type:"долгое", current:420, forecast:450, order:450, urgency:"buffer" },
+  { material:"Соль (локальное)", type:"быстрое", current:1200, forecast:1250, order:1250, urgency:"under_order" },
+  { material:"Куркума (импорт)", type:"долгое", current:180, forecast:210, order:210, urgency:"buffer" },
+];
+
+/* ========== ФОРМАТ + СТАТУСЫ ========== */
+const ru = (n,d=0)=> Number(n).toLocaleString('ru-RU',{minimumFractionDigits:d,maximumFractionDigits:d});
+const mln = (n,d=1)=> ru(n,d)+" млн ₽";
+const pct = (n,d=1)=> ru(n,d).replace('-','−')+" %";
+const tys = (n)=> ru(n,0)+" тыс ₽";
+const rub = (n)=> ru(n,0)+" ₽";
+const pp = (n)=> (n>0?"+":n<0?"−":"")+ru(Math.abs(n),Math.abs(n)%1?1:0)+" пп";
+const dlt = (n)=> (n>0?"+":n<0?"−":"")+ru(Math.abs(n),Math.abs(n)%1?1:0)+" %";
+function downloadExcel(filename, headers, rows){
+  let html='<table border="1"><tr>'+headers.map(h=>'<th>'+h+'</th>').join('')+'</tr>';
+  rows.forEach(r=>{ html+='<tr>'+r.map(c=>'<td>'+c+'</td>').join('')+'</tr>'; });
+  html+='</table>';
+  const blob=new Blob(['﻿<html><head><meta charset="utf-8"></head><body>'+html+'</body></html>'],{type:'application/vnd.ms-excel'});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement('a'); a.href=url; a.download=filename;
+  document.body.appendChild(a); a.click(); document.body.removeChild(a); URL.revokeObjectURL(url);
+}
+
+const ST = {
+  critical:{cls:"p-red", color:"var(--red)", txt:"критично"},
+  alert:{cls:"p-amber", color:"var(--amber)", txt:"внимание"},
+  normal:{cls:"p-green", color:"var(--green)", txt:"норма"},
+  ok:{cls:"p-green", color:"var(--green)", txt:"норма"},
+  loss:{cls:"p-red", color:"var(--red)", txt:"убыток"},
+  low:{cls:"p-amber", color:"var(--amber)", txt:"низкая"},
+  buffer:{cls:"p-amber", color:"var(--amber)", txt:"буфер"},
+  under_order:{cls:"p-red", color:"var(--red)", txt:"дозаказ"},
+};
+const st = (s)=> ST[s] || ST.normal;
+const GEN_NOTE = "* — сгенерированные данные для демонстрации";
+function Star(){ return <span className="star">*</span>; }
+function GenNote(){ return <p className="footnote">{GEN_NOTE}</p>; }
+/* единые цвета маркетплейсов: Ozon — синий, WB — сиреневый, Яндекс — жёлтый */
+const MPC = { ozon:"#2A6FDB", wb:"#8B5CF6", yandex:"#F4B740" };
+const MPC_BG = { ozon:"#DBEAFE", wb:"#EDE9FE", yandex:"#FEF3C7" };
+const MPC_INK = { ozon:"#1E3A8A", wb:"#5B21B6", yandex:"#8A5A00" };
+function mpKey(s){ const t=(""+s).toLowerCase();
+  if(t.includes("wb")||t.includes("wild")) return "wb";
+  if(t.includes("янд")||t.includes("ям")) return "yandex";
+  if(t.includes("ozon")||t.includes("озон")) return "ozon";
+  return null; }
+function Ctag({children}){
+  const k=mpKey(children);
+  const style=k?{background:MPC_BG[k],color:MPC_INK[k]}:undefined;
+  return <span className="ctag" style={style}>{children}</span>;
+}
+
+
+/* ===================== UI: иконки и каркас ===================== */
+const {
+  LineChart, Line, BarChart, Bar, ComposedChart, Area, AreaChart,
+  PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend,
+  ResponsiveContainer, ReferenceLine
+} = Recharts;
+const { useState } = React;
+
+const ico=(p,s=18)=>(<svg width={s} height={s} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.7" strokeLinecap="round" strokeLinejoin="round">{p}</svg>);
+const I={
+  cart: ico(<><circle cx="9" cy="20" r="1.6"/><circle cx="17" cy="20" r="1.6"/><path d="M3 4h2l2.6 12h10.2L21 8H6"/></>),
+  pulse: ico(<><path d="M3 12h4l2.5-7 4 14 2.5-7H21"/></>),
+  crystal: ico(<><path d="M12 3l7 5-2.6 11H7.6L5 8z"/><path d="M5 8h14"/><path d="M12 3v16"/></>),
+  search: ico(<><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></>,16),
+  bell: ico(<><path d="M18 9a6 6 0 1 0-12 0c0 7-2 8-2 8h16s-2-1-2-8"/><path d="M10.3 21a2 2 0 0 0 3.4 0"/></>,18),
+  mail: ico(<><rect x="3" y="5" width="18" height="14" rx="2.5"/><path d="m3 7 9 6 9-6"/></>,18),
+  cal: ico(<><rect x="3" y="5" width="18" height="16" rx="2.5"/><path d="M8 3v4M16 3v4M3 11h18"/></>,15),
+  dl: ico(<><path d="M12 3v12"/><path d="m6 11 6 5 6-5"/><path d="M4 21h16"/></>,15),
+  head: ico(<><path d="M4 14a8 8 0 0 1 16 0"/><rect x="3" y="14" width="4" height="6" rx="1.6"/><rect x="17" y="14" width="4" height="6" rx="1.6"/></>),
+  ok: ico(<><path d="m5 13 4.5 4.5L19 8"/></>,17),
+  warn: ico(<><path d="M12 4 2.7 20h18.6z"/><path d="M12 10v5"/><circle cx="12" cy="17.6" r=".4"/></>,17),
+  zap: ico(<><path d="M13 2 4 14h6l-1 8 9-12h-6z"/></>,17),
+  boxi: ico(<><path d="m3.3 7 8.7 5 8.7-5"/><path d="M12 22V12"/><path d="M21 16.5v-9L12 2 3 7.5v9L12 22z"/></>,17),
+  send: ico(<><path d="m4 12 16-8-5 16-3.5-6z"/><path d="m20 4-9 10"/></>,16),
+  user: ico(<><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></>,16),
+  doc: ico(<><path d="M6 2h9l5 5v15H6z"/><path d="M15 2v5h5"/></>,16),
+  chat: ico(<><path d="M21 12a8 8 0 0 1-8 8H4l2-3a8 8 0 1 1 15-5z"/></>,16),
+  gear: ico(<><circle cx="12" cy="12" r="3.2"/><path d="M19 12a7 7 0 0 0-.1-1.2l2-1.5-2-3.4-2.3 1a7 7 0 0 0-2-1.2L14.2 3h-4l-.4 2.5a7 7 0 0 0-2 1.2l-2.3-1-2 3.4 2 1.5a7 7 0 0 0 0 2.4l-2 1.5 2 3.4 2.3-1a7 7 0 0 0 2 1.2l.4 2.5h4l.4-2.5a7 7 0 0 0 2-1.2l2.3 1 2-3.4-2-1.5c.1-.4.1-.8.1-1.2z"/></>,16),
+};
+
+/* chart defaults */
+const grid={strokeDasharray:"3 3", stroke:"#ECEEF2"};
+const ax={fontSize:11.5, fontFamily:"'JetBrains Mono',monospace"};
+const chartBox=(h)=>({width:'100%',height:h||250});
+const tipStyle={borderRadius:14,border:"none",boxShadow:"0 8px 24px rgba(15,20,25,.12)",fontSize:12.5,fontFamily:"Manrope"};
+
+/* ===== каркас ===== */
+function Card({title, subtitle, gen, col, right, children, tight}){
+  return (
+    <div className={"card"+(tight?" tight":"")+(col?" c"+col:"")}>
+      {(title||right) && <div className="ch">
+        <div>{title && <h3>{title}{gen && <span className="star">*</span>}</h3>}{subtitle && <p>{subtitle}</p>}</div>
+        {right}
+      </div>}
+      {children}
+      {gen && <p className="footnote">{GEN_NOTE}</p>}
+    </div>
+  );
+}
+function Chip({tone, children}){ return <span className={"chip ch-"+(tone||"gray")}>{children}</span>; }
+function DChip({d, unit, betterUp, label}){
+  if(d==null) return null;
+  const good = d===0?null:((d>0)===betterUp);
+  const tone = good==null?"gray":good?"green":"red";
+  const arrow = d>0?"↑":d<0?"↓":"→";
+  const sign = d>0?"+":d<0?"−":"";
+  return <span className={"chip ch-"+tone}>{arrow} {sign}{ru(Math.abs(d),Math.abs(d)%1?1:0)}{unit}{label?" "+label:""}</span>;
+}
+function KCard({title, value, gen, chips, note, col}){
+  return (
+    <div className={"kcard"+(col?" c"+col:"")}>
+      <div className="kt"><span>{title}</span></div>
+      <div className="kv">{value}{gen && <span className="star">*</span>}</div>
+      {chips && <div className="kchips">{chips}</div>}
+      {note && <div className="knote">{note}</div>}
+    </div>
+  );
+}
+function Recs({items}){
+  const tm={red:["var(--red-soft)","var(--red-ink)","РИСК"],amber:["var(--amber-soft)","var(--amber-ink)","ВНИМАНИЕ"],
+    green:["var(--green-soft)","var(--green-ink)","РОСТ"],blue:["var(--blue-soft)","var(--blue-ink)","ДЕЙСТВИЕ"]};
+  return <div>{items.map((r,i)=>{const t=tm[r.tone]||tm.blue;
+    return <div className="rec" key={i}><span className="rtag" style={{background:t[0],color:t[1]}}>{r.tag||t[2]}</span><div>{r.text}</div></div>;})}</div>;
+}
+function Feed({items, go}){
+  const icon={ok:[I.ok,"f-green"], critical:[I.warn,"f-red"], alert:[I.warn,"f-amber"], info:[I.zap,"f-blue"]};
+  return (
+    <div className="feed">
+      {items.map((a,i)=>{const [ic,cls]=icon[a.type]||icon.info;
+        return (
+          <div key={i} className={"fitem"+(a.go?" clk":"")} onClick={a.go&&go?()=>go(a.go[0],a.go[1]):undefined}>
+            <div className={"fic "+cls}>{ic}</div>
+            <div className="ft"><div className="t1">{a.text}</div>{a.sub && <div className="t2">{a.sub}</div>}</div>
+            {a.time && <div className="ftime">{a.time}</div>}
+          </div>);})}
+    </div>
+  );
+}
+function MpDot({k}){ return <span style={{width:9,height:9,borderRadius:99,background:MPC[k],display:"inline-block",flexShrink:0}}/>; }
+
+/* ===================== ЭТАП 1 · ГЛАВНАЯ ===================== */
+function RevenueTip({active, payload, label}){
+  if(!active || !payload || !payload.length) return null;
+  const total=payload.reduce((a,p)=>a+(p.value||0),0);
+  const nm={ozon:"Ozon",wb:"Wildberries",yandex:"Яндекс Маркет"};
+  return (
+    <div style={{background:'#fff',borderRadius:14,padding:'11px 14px',boxShadow:'0 8px 24px rgba(15,20,25,.12)'}}>
+      <div style={{fontWeight:800,marginBottom:6,fontSize:13}}>{label}</div>
+      {payload.map((p,i)=>(
+        <div key={i} style={{color:p.color,fontSize:12.5,fontWeight:700,marginTop:3}}>
+          {nm[p.dataKey]}: {mln(p.value)} · {total?Math.round(p.value/total*100):0}%
+        </div>))}
+    </div>);
+}
+function S1_Home({go}){
+  const K=MAIN_KPI_GEN;
+  const [metric,setMetric]=useState("revenue");
+  const [dir,setDir]=useState("top");
+  const ranked=[...SKU_FULL_GEN].sort((a,b)=> dir==="top"?b[metric]-a[metric]:a[metric]-b[metric]).slice(0,5);
+  const shares=[["ozon","Ozon",39.3,"t-blue"],["wb","Wildberries",11.2,"t-lilac"],["yandex","Яндекс Маркет",3.6,"t-yellow"]];
+  return (
+    <div className="grid">
+      <div className="card hero c7">
+        <div className="hlabel"><i/>Выручка маркетплейсов · май 2026</div>
+        <div className="hnum">{mln(MP_KPI.gmvMonth)}</div>
+        <div className="hunit">GMV: Ozon + Wildberries + Яндекс Маркет</div>
+        <div className="hchips">
+          <DChip d={K.revenueMom} unit="%" betterUp={true} label="к пред. месяцу"/>
+          <DChip d={K.revenueYoy} unit="%" betterUp={true} label="к пред. году"/>
+          <Chip tone="gray">поступило на счёт {mln(MP_KPI.payoutMonth)}</Chip>
+        </div>
+        <div style={{...chartBox(240),marginTop:18}}>
+          <ResponsiveContainer>
+            <LineChart data={REVENUE_12M} margin={{top:6,right:10,left:-14,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="month" tick={{...ax,fontSize:10.5}} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip content={<RevenueTip/>}/>
+              <Line type="monotone" dataKey="ozon" stroke={MPC.ozon} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="wb" stroke={MPC.wb} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="yandex" stroke={MPC.yandex} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg">
+          <span><i style={{background:MPC.ozon}}/>Ozon</span>
+          <span><i style={{background:MPC.wb}}/>Wildberries</span>
+          <span><i style={{background:MPC.yandex}}/>Яндекс Маркет</span>
+        </div>
+        <p className="footnote">{GEN_NOTE} (опорные месяцы — реальные, между ними интерполяция)</p>
+      </div>
+
+      <div className="c5">
+        <div className="krow" style={{gridTemplateColumns:'repeat(2,1fr)',marginBottom:16}}>
+          <KCard gen title="Чистая прибыль · мес" value={mln(K.netProfit)}
+            chips={<><DChip d={K.netProfitMom} unit="%" betterUp={true}/><DChip d={K.netProfitYoy} unit="%" betterUp={true} label="г/г"/></>}/>
+          <KCard gen title="Маржинальность" value={pct(K.margin)}
+            chips={<><DChip d={K.marginMom} unit=" пп" betterUp={true}/><DChip d={K.marginYoy} unit=" пп" betterUp={true} label="г/г"/></>}/>
+          <KCard gen title="Заказы · мес" value={ru(K.orders)}
+            chips={<><DChip d={K.ordersMom} unit="%" betterUp={true}/><DChip d={K.ordersYoy} unit="%" betterUp={true} label="г/г"/></>}/>
+          <KCard gen title="Средний чек" value={rub(K.avgCheck)}
+            chips={<><DChip d={K.avgCheckMom} unit="%" betterUp={true}/><DChip d={K.avgCheckYoy} unit="%" betterUp={true} label="г/г"/></>}/>
+        </div>
+        <div className="kcard">
+          <div className="kt"><span>% возвратов WB</span><Chip tone="amber">внимание</Chip></div>
+          <div className="kv">{pct(K.wbReturnPct)}<span className="star">*</span></div>
+          <div className="kchips">
+            <DChip d={K.wbReturnMom} unit=" пп" betterUp={false} label="к месяцу"/>
+            <DChip d={K.wbReturnYoy} unit=" пп" betterUp={false} label="к году"/>
+          </div>
+        </div>
+      </div>
+
+      <div className="c12"><div className="tiles">
+        {shares.map(([k,n,v,cls])=>(
+          <div key={k} className={"tile "+cls}>
+            <div className="tn"><MpDot k={k}/>{n}</div>
+            <div className="tv">{mln(v)}</div>
+            <div className="ts">{Math.round(v/MP_KPI.gmvMonth*100)}% оборота · удержано {k==="ozon"?"73%":k==="wb"?"43%":"67%"}</div>
+          </div>))}
+      </div></div>
+
+      <Card col={4} gen title="Маржа по каналам" subtitle="пред. месяц → тек. месяц → год, %">
+        <div style={chartBox(260)}>
+          <ResponsiveContainer>
+            <BarChart data={MARGIN_BY_CHANNEL_GEN} layout="vertical" margin={{top:4,right:36,left:6,bottom:0}}>
+              <CartesianGrid {...grid} horizontal={false}/>
+              <XAxis type="number" tick={ax} stroke="#B6BBC4" unit="%" tickLine={false} axisLine={false}/>
+              <YAxis type="category" dataKey="channel" tick={{fontSize:12,fontWeight:700}} stroke="#B6BBC4" width={88} tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[ru(v,1)+" %", n==="prev"?"Пред. месяц":n==="cur"?"Тек. месяц":"Год"]}/>
+              <Bar dataKey="prev" fill="#C9CED6" radius={[0,6,6,0]} barSize={9} isAnimationActive={false} label={{position:"right",formatter:(v)=>ru(v,1),fontSize:10,fontWeight:700,fill:"#9AA0A8"}}/>
+              <Bar dataKey="cur" fill="#0F1419" radius={[0,6,6,0]} barSize={9} isAnimationActive={false} label={{position:"right",formatter:(v)=>ru(v,1),fontSize:10,fontWeight:700,fill:"#0F1419"}}/>
+              <Bar dataKey="year" fill="#10B981" radius={[0,6,6,0]} barSize={9} isAnimationActive={false} label={{position:"right",formatter:(v)=>ru(v,1),fontSize:10,fontWeight:700,fill:"#10B981"}}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:"#C9CED6"}}/>Пред. месяц</span><span><i style={{background:"#0F1419"}}/>Тек. месяц</span><span><i style={{background:"#10B981"}}/>Год</span></div>
+      </Card>
+
+      <Card col={8} gen title="Рейтинг SKU" subtitle="лучшие и худшие позиции по выручке и марже"
+        right={<div style={{display:'flex',gap:8,flexWrap:'wrap'}}>
+          <div className="toggle">
+            <button className={"tg"+(metric==="revenue"?" active":"")} onClick={()=>setMetric("revenue")}>По выручке</button>
+            <button className={"tg"+(metric==="margin"?" active":"")} onClick={()=>setMetric("margin")}>По марже</button>
+          </div>
+          <div className="toggle">
+            <button className={"tg"+(dir==="top"?" active":"")} onClick={()=>setDir("top")}>Топ-5</button>
+            <button className={"tg"+(dir==="bottom"?" active":"")} onClick={()=>setDir("bottom")}>Анти-топ 5</button>
+          </div>
+        </div>}>
+        <table>
+          <thead><tr><th>#</th><th>SKU</th><th>Канал</th><th className="num">Выручка</th><th className="num">Маржа</th></tr></thead>
+          <tbody>
+            {ranked.map((r,i)=>(
+              <tr key={i}><td className="num" style={{textAlign:'left',color:'var(--muted)'}}>{i+1}</td><td style={{fontWeight:700}}>{r.sku}</td><td><Ctag>{r.channel}</Ctag></td>
+                <td className="num"><b>{rub(r.revenue)}</b></td>
+                <td className="num"><b style={{color:r.margin<25?'var(--red)':'var(--green)'}}>{ru(r.margin,1)} %</b></td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+
+      <Card col={6} gen title="Сигналы" subtitle="нажмите, чтобы перейти к разделу">
+        <Feed go={go} items={[
+          {type:"critical", text:"Демпинг: SpiceLab уронил «Куркума 250г» до 129 ₽ (−9% за неделю)", sub:"Цены конкурентов · Ozon · мы дороже на 5%", time:"08:02", go:[1,"prices"]},
+          {type:"critical", text:"Паприка копчёная на WB — остаток 12 дней до нуля", sub:"Склад · отгрузка 200 ед. до 13.06", time:"09:41", go:[1,"stock"]},
+          {type:"critical", text:"ДРР Ozon вчера — 9,3% при пороге 8%", sub:"Реклама · кампания «Приправы — поиск»", time:"08:15", go:[1,"ads"]},
+          {type:"alert", text:"Оборачиваемость Ozon выросла до 174 дней", sub:"Склад · цель 60 дней", time:"вчера", go:[1,"stock"]},
+          {type:"ok", text:"Поставка WB подтверждена на 16 июня", sub:"Склад Коледино · 150 ед.", time:"вчера"},
+        ]}/>
+      </Card>
+      <Card col={6} gen title="AI-рекомендации" subtitle="приоритетные действия на сегодня">
+        <Recs items={[
+          {tone:"green", tag:"ЦЕНА", text:"Снижение цены Куркума 250г на 15 ₽ прогнозирует рост заказов на 22% при сохранении положительной маржи."},
+          {tone:"amber", tag:"СКЛАД", text:"По Паприка копчёная на WB (склад Белая Дача) рекомендуется отгрузка 200 ед. в течение 7 дней."},
+          {tone:"red", tag:"РЕКЛАМА", text:"ДРР Ozon превысил целевой уровень. Рекомендуется снизить ставку по кампании «Приправы» на 15%."},
+        ]}/>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · ТОВАРНАЯ АНАЛИТИКА ===================== */
+function S1_Products(){
+  const [ch,setCh]=useState("all");
+  const factor=ch==="ozon"?0.58:ch==="wb"?0.36:ch==="yandex"?0.06:1;
+  const catData=CATEGORY_SALES_GEN.map(r=>({month:r.month,
+    monoSpices:+(r.monoSpices*factor).toFixed(2), blends:+(r.blends*factor).toFixed(2),
+    peppers:+(r.peppers*factor).toFixed(2), sets:+(r.sets*factor).toFixed(2)}));
+  const [selProd,setSelProd]=useState("all");
+  const [pq,setPq]=useState("");
+  const foundP=CHANNEL_SKU_GEN.filter(r=>r.sku.toLowerCase().includes(pq.trim().toLowerCase()));
+  const cmpSrc = selProd==="all"?CHANNEL_SKU_GEN:CHANNEL_SKU_GEN.filter(r=>r.sku===selProd);
+  const cmpData=cmpSrc.map(r=>({name:r.sku, wb:r.wb, ozon:r.ozon}));
+  const adv = Math.round(CHANNEL_SKU_GEN.reduce((a,b)=>a+(b.ozon-b.wb)/b.wb,0)/CHANNEL_SKU_GEN.length*100);
+  const RUNAME={monoSpices:"Моно-специи",blends:"Смеси",peppers:"Перцы",sets:"Наборы"};
+  const CATC={monoSpices:"#10B981",blends:MPC.ozon,peppers:MPC.yandex,sets:MPC.wb};
+  const lbl=(v)=> v>=0.3?ru(v,1):"";
+  const abcChip=(a)=> a==="A"?<Chip tone="green">A</Chip>:a==="B"?<Chip tone="amber">B</Chip>:<Chip tone="gray">C</Chip>;
+  return (
+    <div className="grid">
+      <Card col={12} gen title="ABC-матрица — топ SKU по операционной прибыли" subtitle="класс A — основной вклад в прибыль, B — средний, C — низкий">
+        <table>
+          <thead><tr><th>№</th><th>SKU</th><th>Категория</th><th>Канал</th><th className="num">Заказы</th><th className="num">Выручка</th><th className="num">Маржа</th><th>ABC</th></tr></thead>
+          <tbody>
+            {ABC_MATRIX_GEN.map((r)=>(
+              <tr key={r.n}><td className="num" style={{textAlign:'left',color:'var(--muted)'}}>{r.n}</td><td style={{fontWeight:700}}>{r.sku}</td><td>{r.cat}</td><td><Ctag>{r.channel}</Ctag></td>
+                <td className="num">{ru(r.orders)}</td><td className="num">{rub(r.revenue)}</td><td className="num">{ru(r.margin,1)} %</td>
+                <td>{abcChip(r.abc)}</td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+
+      <Card col={12} gen title="Сравнение по каналам — по позициям" subtitle="операционная прибыль, ₽ за единицу · одна и та же позиция на WB и Ozon"
+        right={<div style={{display:'flex',gap:9,flexWrap:'wrap'}}>
+          <input className="sel" style={{minWidth:210}} type="text" placeholder="поиск товара…" value={pq} onChange={e=>setPq(e.target.value)}/>
+          <select className="sel" value={selProd} onChange={e=>setSelProd(e.target.value)}>
+            <option value="all">Все позиции</option>
+            {foundP.map((r,i)=><option key={i} value={r.sku}>{r.sku}</option>)}
+          </select>
+        </div>}>
+        <div style={chartBox(40+cmpSrc.length*62)}>
+          <ResponsiveContainer>
+            <BarChart data={cmpData} layout="vertical" margin={{top:4,right:58,left:26,bottom:0}} barGap={3}>
+              <CartesianGrid {...grid} horizontal={false}/>
+              <XAxis type="number" tick={ax} stroke="#B6BBC4" domain={[0,3000]} unit=" ₽" tickLine={false} axisLine={false}/>
+              <YAxis type="category" dataKey="name" tick={{fontSize:12,fontWeight:700}} stroke="#B6BBC4" width={158} tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[rub(v), n==="wb"?"Wildberries":"Ozon"]}/>
+              <Bar dataKey="wb" fill={MPC.wb} radius={[0,7,7,0]} barSize={15} isAnimationActive={false} label={{position:"right",formatter:(v)=>ru(v),fontSize:11,fontWeight:700,fill:MPC.wb}}/>
+              <Bar dataKey="ozon" fill={MPC.ozon} radius={[0,7,7,0]} barSize={15} isAnimationActive={false} label={{position:"right",formatter:(v)=>ru(v),fontSize:11,fontWeight:700,fill:MPC.ozon}}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:MPC.wb}}/>Wildberries, ₽/ед</span><span><i style={{background:MPC.ozon}}/>Ozon, ₽/ед</span></div>
+        <div className="insight">Один и тот же артикул зарабатывает на Ozon в среднем на ≈{adv}% больше за единицу — приоритет каналу при распределении остатков.</div>
+      </Card>
+
+      <Card col={12} gen title="Динамика продаж по категориям" subtitle="млн ₽ / мес · значения внутри столбцов"
+        right={<div className="toggle">
+          {[["all","Все"],["ozon","Ozon"],["wb","WB"],["yandex","Яндекс"]].map(([k,n])=>(
+            <button key={k} className={"tg"+(ch===k?" active":"")} onClick={()=>setCh(k)}>{n}</button>))}
+        </div>}>
+        <div style={chartBox(290)}>
+          <ResponsiveContainer>
+            <BarChart data={catData} margin={{top:6,right:10,left:-14,bottom:0}} barSize={54}>
+              <CartesianGrid {...grid} vertical={false}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[ru(v,1)+" млн ₽", RUNAME[n]]}/>
+              <Bar dataKey="monoSpices" stackId="a" fill={CATC.monoSpices} isAnimationActive={false} label={{position:"center",fill:"#fff",fontSize:11,fontWeight:800,formatter:lbl}}/>
+              <Bar dataKey="blends" stackId="a" fill={CATC.blends} isAnimationActive={false} label={{position:"center",fill:"#fff",fontSize:11,fontWeight:800,formatter:lbl}}/>
+              <Bar dataKey="peppers" stackId="a" fill={CATC.peppers} isAnimationActive={false} label={{position:"center",fill:"#fff",fontSize:11,fontWeight:800,formatter:lbl}}/>
+              <Bar dataKey="sets" stackId="a" fill={CATC.sets} radius={[8,8,0,0]} isAnimationActive={false} label={{position:"center",fill:"#fff",fontSize:11,fontWeight:800,formatter:lbl}}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg">{Object.keys(RUNAME).map(k=><span key={k}><i style={{background:CATC[k]}}/>{RUNAME[k]}</span>)}</div>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · ЮНИТ-ЭКОНОМИКА ===================== */
+function S1_Unit(){
+  const [sku,setSku]=useState(UNIT_ECON_GEN[0].sku);
+  const [q,setQ]=useState("");
+  const found=UNIT_ECON_GEN.filter(x=>x.sku.toLowerCase().includes(q.trim().toLowerCase()));
+  const u=UNIT_ECON_GEN.find(x=>x.sku===sku);
+  const holds=u.commission+u.logistics+u.ads+u.acquiring;
+  const payout=u.price-holds;
+  const profit=payout-u.cost;
+  const marginPct=profit/u.price*100;
+  const seg=[
+    { l:"Себестоимость", v:u.cost, c:"#0F1419" },
+    { l:"Комиссия МП", v:u.commission, c:"#FF4D4F" },
+    { l:"Логистика", v:u.logistics, c:"#F4B740" },
+    { l:"Реклама", v:u.ads, c:"#8B5CF6" },
+    { l:"Эквайринг", v:u.acquiring, c:"#9AA0A8" },
+    { l:"Прибыль", v:Math.max(profit,0), c:"#10B981" },
+  ];
+  const exportXls=()=>{
+    const headers=["SKU","Цена ₽","Удержания ₽","Выплата ₽","Себестоимость ₽","Прибыль/ед ₽","Маржа %"];
+    const rows=UNIT_ECON_GEN.map(x=>{const h=x.commission+x.logistics+x.ads+x.acquiring,p=x.price-h,pr=p-x.cost;
+      return [x.sku,x.price,h,p,x.cost,pr,(pr/x.price*100).toFixed(1).replace('.',',')];});
+    downloadExcel("unit-economics-arta.xls", headers, rows);
+  };
+  return (
+    <div className="grid">
+      <Card col={12} gen title="Разбор цены по товару" subtitle="из чего складывается прибыль с единицы"
+        right={<div style={{display:'flex',gap:9,flexWrap:'wrap'}}>
+          <input className="sel" style={{minWidth:230}} type="text" placeholder="поиск товара…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <select className="sel" value={sku} onChange={e=>setSku(e.target.value)}>
+            {found.map((x,i)=><option key={i} value={x.sku}>{x.sku}</option>)}
+          </select>
+        </div>}>
+        <div className="compbar">
+          {seg.filter(s=>s.v>0).map((s,i)=>(
+            <div key={i} className="seg" style={{flex:s.v,background:s.c}} title={s.l+": "+s.v+" ₽"}>{s.v>=10?s.v+" ₽":""}</div>))}
+        </div>
+        <div className="leg">{seg.map((s,i)=>(<span key={i}><i style={{background:s.c}}/>{s.l} · {ru(s.v)} ₽</span>))}</div>
+        {profit<0 && <div className="rec" style={{marginTop:12,background:"var(--red-soft)"}}><span className="rtag" style={{background:"#fff",color:"var(--red-ink)"}}>УБЫТОК</span>
+          <div>Выплата после МП ({ru(payout)} ₽) ниже себестоимости ({ru(u.cost)} ₽) — минус {ru(Math.abs(profit))} ₽ с единицы.</div></div>}
+      </Card>
+
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard gen title="Цена розничная" value={rub(u.price)} note="цена на площадке"/>
+        <KCard gen title="Удержания МП" value={rub(holds)} note={"≈ "+Math.round(holds/u.price*100)+"% от цены"} chips={<Chip tone="amber">внимание</Chip>}/>
+        <KCard gen title="Выплата после МП" value={rub(payout)} note="приходит на счёт"/>
+        <KCard gen title="Прибыль с единицы" value={(profit>0?"+":"")+rub(profit)} note={"маржа "+ru(marginPct,1)+" %"}
+          chips={profit<0?<Chip tone="red">убыток</Chip>:marginPct<8?<Chip tone="amber">на грани</Chip>:<Chip tone="green">норма</Chip>}/>
+      </div></div>
+
+      <Card col={12} gen title="Сводная по всем SKU" subtitle="цена, удержания, выплата, себестоимость и прибыль с единицы"
+        right={<button className="btn" onClick={exportXls}>{I.dl}Скачать Excel</button>}>
+        <table>
+          <thead><tr><th>SKU</th><th className="num">Цена</th><th className="num">Удержания</th><th className="num">Выплата</th><th className="num">Себест.</th><th className="num">Прибыль/ед</th><th className="num">Маржа</th><th>Статус</th></tr></thead>
+          <tbody>
+            {UNIT_ECON_GEN.map((x,i)=>{
+              const h=x.commission+x.logistics+x.ads+x.acquiring, p=x.price-h, pr=p-x.cost, m=pr/x.price*100;
+              return <tr key={i} className={pr<0?"row-warn":""}>
+                <td style={{fontWeight:700}}>{x.sku}</td><td className="num">{ru(x.price)} ₽</td><td className="num">{ru(h)} ₽</td><td className="num">{ru(p)} ₽</td><td className="num">{ru(x.cost)} ₽</td>
+                <td className="num"><b style={{color:pr<0?'var(--red)':'var(--green)'}}>{pr>0?"+":""}{ru(pr)} ₽</b></td>
+                <td className="num">{ru(m,1)} %</td>
+                <td>{pr<0?<Chip tone="red">убыток</Chip>:m<8?<Chip tone="amber">на грани</Chip>:<Chip tone="green">прибыль</Chip>}</td>
+              </tr>;})}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · РЕКЛАМА ===================== */
+function S1_Ads(){
+  const avgDrr=DRR_BY_SKU_GEN.reduce((a,b)=>a+b.drr,0)/DRR_BY_SKU_GEN.length;
+  const over=DRR_BY_SKU_GEN.filter(r=>r.drr>r.margin).length;
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard title="Рекламный бюджет / мес" value={mln(MP_KPI.adBudget)} note="вырос ×11 за год" chips={<Chip tone="amber">внимание</Chip>}/>
+        <KCard gen title="Средний ДРР" value={pct(avgDrr)} note="по отслеживаемым SKU"/>
+        <KCard title="Доля рекламы в GMV" value={pct(17,0)} note="≈ 8 млн ₽ при GMV 54,1 млн ₽"/>
+        <KCard gen title="SKU с ДРР выше маржи" value={over+" из "+DRR_BY_SKU_GEN.length} note="реклама убыточна" chips={<Chip tone="red">критично</Chip>}/>
+      </div></div>
+
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        {AD_DRR_PLATFORM_GEN.map((p,i)=>{
+          const k=mpKey(p.platform);
+          return <KCard key={i} gen title={"ДРР · "+p.platform} value={pct(p.drr)}
+            chips={<><DChip d={p.mom} unit=" пп" betterUp={false} label="мес"/><DChip d={p.yoy} unit=" пп" betterUp={false} label="г/г"/></>}
+            note={k?null:undefined}/>;})}
+      </div></div>
+      <p className="footnote c12" style={{marginTop:-8}}>{GEN_NOTE}. Рост ДРР — красным (расходы на рекламу растут быстрее выручки).</p>
+
+      <Card col={5} title="Рекламный бюджет по площадкам" subtitle="млн ₽ / мес · сравнение с прошлым месяцем и годом">
+        <table>
+          <thead><tr><th>Площадка</th><th className="num">Бюджет</th><th className="num">к мес</th><th className="num">к году</th></tr></thead>
+          <tbody>
+            {AD_BUDGET_BY_PLATFORM.map((r,i)=>{
+              const d=(v)=>(v>0?"+":v<0?"−":"")+ru(Math.abs(v))+"%";
+              const c=(v)=>v>0?"var(--red)":v<0?"var(--green)":"var(--muted)";
+              return <tr key={i}>
+                <td><Ctag>{r.platform}</Ctag></td>
+                <td className="num"><b>{mln(r.monthly,r.monthly<1?2:1)}</b></td>
+                <td className="num" style={{color:c(r.mom)}}>{d(r.mom)}</td>
+                <td className="num" style={{color:c(r.yoy)}}>{d(r.yoy)}</td>
+              </tr>;})}
+            <tr><td style={{fontWeight:800}}>Все площадки</td><td className="num"><b>{mln(8.0)}</b></td><td className="num" style={{color:"var(--red)"}}>+1%</td><td className="num" style={{color:"var(--red)"}}>×11</td></tr>
+          </tbody>
+        </table>
+        <p className="footnote">Рост бюджета — красным, снижение — зелёным.</p>
+      </Card>
+      <Card col={7} title="Динамика рекламного бюджета по площадкам" subtitle="Ozon ×11 за год · WB и Яндекс тоже растут · млн ₽ / мес">
+        <div style={chartBox(250)}>
+          <ResponsiveContainer>
+            <LineChart data={ADS_MONTHLY_GEN} margin={{top:6,right:10,left:-14,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[mln(v), n==="ozon"?"Ozon":n==="wb"?"WB":"Яндекс"]}/>
+              <Line type="monotone" dataKey="ozon" stroke={MPC.ozon} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="wb" stroke={MPC.wb} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="yandex" stroke={MPC.yandex} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:MPC.ozon}}/>Ozon</span><span><i style={{background:MPC.wb}}/>Wildberries</span><span><i style={{background:MPC.yandex}}/>Яндекс Маркет</span></div>
+      </Card>
+
+      <Card col={12} gen title="ДРР по дням — WB и Ozon, 30 дней" subtitle="доля рекламных расходов, % · красная линия — порог 8%">
+        <div style={chartBox(270)}>
+          <ResponsiveContainer>
+            <ComposedChart data={DRR_DAILY2_GEN} margin={{top:6,right:14,left:-14,bottom:0}}>
+              <defs>
+                <linearGradient id="drrO" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={MPC.ozon} stopOpacity={0.18}/><stop offset="100%" stopColor={MPC.ozon} stopOpacity={0.02}/></linearGradient>
+                <linearGradient id="drrW" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor={MPC.wb} stopOpacity={0.16}/><stop offset="100%" stopColor={MPC.wb} stopOpacity={0.02}/></linearGradient>
+              </defs>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="day" tick={{...ax,fontSize:10}} stroke="#B6BBC4" interval={2} tickFormatter={(d)=>d+" д"} tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" unit="%" domain={[4,11]} tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[ru(v,1)+" %", n==="wb"?"Wildberries":"Ozon"]} labelFormatter={(l)=>"День "+l}/>
+              <ReferenceLine y={8} stroke="#FF4D4F" strokeDasharray="6 5" label={{value:"порог 8%",position:"insideTopRight",fontSize:11,fill:"#FF4D4F"}}/>
+              <Area type="monotone" dataKey="ozon" stroke={MPC.ozon} strokeWidth={3} fill="url(#drrO)" dot={false}/>
+              <Area type="monotone" dataKey="wb" stroke={MPC.wb} strokeWidth={3} fill="url(#drrW)" dot={false}/>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:MPC.ozon}}/>Ozon</span><span><i style={{background:MPC.wb}}/>Wildberries</span></div>
+      </Card>
+
+      <Card col={7} gen title="Разбивка по кампаниям" subtitle="расход, выручка и ДРР, тыс ₽">
+        <table>
+          <thead><tr><th>Кампания</th><th>Площадка</th><th className="num">Расход</th><th className="num">Выручка</th><th className="num">ДРР</th><th>Статус</th></tr></thead>
+          <tbody>
+            {AD_CAMPAIGNS_GEN.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.name}</td><td><Ctag>{r.platform}</Ctag></td><td className="num">{tys(r.spend)}</td><td className="num">{tys(r.revenue)}</td>
+                <td className="num"><b>{ru(r.drr,1)} %</b></td>
+                <td>{r.status==="critical"?<Chip tone="red">убыточно</Chip>:r.status==="alert"?<Chip tone="amber">на грани</Chip>:<Chip tone="green">в норме</Chip>}</td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+      <Card col={5} gen title="Рекомендации">
+        <Recs items={[
+          {tone:"red", text:"Отключить «Корзина — авто» (ДРР 43,1%) и «Приправы — поиск» (37%) — кампании убыточны."},
+          {tone:"green", text:"Нарастить «Моно-специи — карточки»: ДРР 16,9% — самый эффективный канал."},
+          {tone:"amber", text:"ДРР Ozon по дням превышал порог 8% в конце периода — снизить ставки на пике."},
+        ]}/>
+      </Card>
+
+      <Card col={12} gen title="Контроль ДРР по SKU" subtitle="доля рекламных расходов vs маржа товара">
+        <table>
+          <thead><tr><th>SKU</th><th className="num">Реклама</th><th className="num">Выручка</th><th className="num">ДРР</th><th className="num">Маржа</th><th>Статус</th></tr></thead>
+          <tbody>
+            {DRR_BY_SKU_GEN.map((r,i)=>(
+              <tr key={i} className={r.status==="critical"?"row-warn":""}><td style={{fontWeight:700}}>{r.sku}</td><td className="num">{tys(r.adSpend)}</td><td className="num">{tys(r.revenue)}</td>
+                <td className="num"><b>{ru(r.drr,1)} %</b></td><td className="num">{r.margin} %</td>
+                <td>{r.status==="critical"?<Chip tone="red">убыточно</Chip>:r.status==="alert"?<Chip tone="amber">на грани</Chip>:<Chip tone="green">в норме</Chip>}</td></tr>))}
+          </tbody>
+        </table>
+        <p className="footnote">ДРР выше маржи — реклама съедает прибыль позиции.</p>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · ЦЕНЫ КОНКУРЕНТОВ ===================== */
+function S1_Prices(){
+  const [sku,setSku]=useState(COMPETITOR_PRICES_GEN[0].sku);
+  const [q,setQ]=useState("");
+  const found=COMPETITOR_PRICES_GEN.filter(x=>x.sku.toLowerCase().includes(q.trim().toLowerCase()));
+  const p=COMPETITOR_PRICES_GEN.find(x=>x.sku===sku);
+  const minComp=Math.min(...p.items.map(i=>i.price));
+  const gap=(p.our-minComp)/minComp*100;
+  const dumpCount=COMPETITOR_PRICES_GEN.reduce((a,b)=>a+b.items.filter(i=>i.dumping).length,0);
+  const tracked=COMPETITOR_PRICES_GEN.reduce((a,b)=>a+b.items.length,0);
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard gen title="Отслеживается" value={tracked+" карточек"} note={COMPETITOR_PRICES_GEN.length+" наших SKU · 5 конкурентов"}/>
+        <KCard gen title="Сигналы демпинга" value={dumpCount} chips={<Chip tone="red">за 7 дней</Chip>} note="снижение > 5% за неделю"/>
+        <KCard gen title="Средний разрыв цен" value="+2,4 %" note="мы vs минимум конкурентов"/>
+        <KCard gen title="Уведомления" value="Telegram" chips={<Chip tone="lime">мгновенно</Chip>} note="при снижении цены конкурентом"/>
+      </div></div>
+
+      <Card col={12} gen title="Сигналы демпинга" subtitle="прилетают в Telegram сразу, как только конкурент роняет цену">
+        <Feed items={DUMPING_ALERTS_GEN}/>
+      </Card>
+
+      <Card col={7} gen title="Цены конкурентов по товару" subtitle="кто и почём продаёт аналог · сравнение с нашей ценой"
+        right={<div style={{display:'flex',gap:9,flexWrap:'wrap'}}>
+          <input className="sel" style={{minWidth:200}} type="text" placeholder="поиск товара…" value={q} onChange={e=>setQ(e.target.value)}/>
+          <select className="sel" value={sku} onChange={e=>setSku(e.target.value)}>
+            {found.map((x,i)=><option key={i} value={x.sku}>{x.sku}</option>)}
+          </select>
+        </div>}>
+        <div className="cells" style={{gridTemplateColumns:'repeat(3,1fr)',marginBottom:14}}>
+          <div className="cell"><div className="l">Наша цена</div><div className="b">{ru(p.our)} ₽</div></div>
+          <div className="cell"><div className="l">Минимум у конкурентов</div><div className="b" style={{color:gap>0?'var(--red)':'var(--green-ink)'}}>{ru(minComp)} ₽</div></div>
+          <div className="cell"><div className="l">Наш разрыв</div><div className="b" style={{color:gap>0?'var(--red)':'var(--green-ink)'}}>{gap>0?"+":""}{ru(gap,1)} %</div><div className="d">{gap>0?"мы дороже":"мы дешевле"}</div></div>
+        </div>
+        <table>
+          <thead><tr><th>Продавец</th><th>Площадка</th><th className="num">Цена</th><th className="num">Неделю назад</th><th className="num">Δ за неделю</th><th>Статус</th></tr></thead>
+          <tbody>
+            {p.items.map((r,i)=>(
+              <tr key={i} className={r.dumping?"row-warn":""}>
+                <td style={{fontWeight:700}}>{r.seller}</td><td><Ctag>{r.mp}</Ctag></td>
+                <td className="num"><b>{ru(r.price)} ₽</b></td><td className="num">{ru(r.prev)} ₽</td>
+                <td className="num" style={{color:r.trend<-5?'var(--red)':r.trend<0?'var(--amber-ink)':'var(--muted)'}}>{r.trend>0?"+":""}{ru(r.trend,1)} %</td>
+                <td>{r.dumping?<Chip tone="red">демпинг</Chip>:r.trend<0?<Chip tone="amber">снижает</Chip>:<Chip tone="green">стабильно</Chip>}</td>
+              </tr>))}
+            <tr style={{background:"var(--hairsoft)"}}>
+              <td style={{fontWeight:800}}>Мы · Арта Групп</td><td><Ctag>OZON</Ctag></td>
+              <td className="num"><b>{ru(p.our)} ₽</b></td><td className="num">{ru(p.our)} ₽</td>
+              <td className="num" style={{color:'var(--muted)'}}>0 %</td><td><Chip tone="gray">наша цена</Chip></td>
+            </tr>
+          </tbody>
+        </table>
+      </Card>
+
+      <Card col={5} gen title="Динамика цен · Куркума молотая 250г" subtitle="8 недель · мы и два главных конкурента, ₽">
+        <div style={chartBox(260)}>
+          <ResponsiveContainer>
+            <LineChart data={PRICE_HISTORY_GEN} margin={{top:6,right:10,left:-10,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="week" tick={{...ax,fontSize:10}} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" domain={[120,155]} unit=" ₽" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[ru(v)+" ₽", {our:"Мы · Арта Групп",spicelab:"SpiceLab",vostok:"Восточный базар"}[n]]}/>
+              <Line type="stepAfter" dataKey="our" stroke="#0F1419" strokeWidth={3} dot={false}/>
+              <Line type="stepAfter" dataKey="spicelab" stroke="#FF4D4F" strokeWidth={3} dot={false}/>
+              <Line type="stepAfter" dataKey="vostok" stroke="#B6BBC4" strokeWidth={3} dot={false}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:"#0F1419"}}/>Мы</span><span><i style={{background:"#FF4D4F"}}/>SpiceLab — демпингует</span><span><i style={{background:"#B6BBC4"}}/>Восточный базар</span></div>
+        <div className="insight">SpiceLab последовательно снижает цену 4 недели подряд (144 → 129 ₽). Похоже на распродажу остатков или борьбу за топ выдачи.</div>
+      </Card>
+
+      <Card col={12} gen title="Рекомендации">
+        <Recs items={[
+          {tone:"red", text:"Куркума 250г: не вступать в ценовую войну сразу — у SpiceLab падение похоже на распродажу. Дать 1–2 недели, держать цену, следить за их остатками."},
+          {tone:"amber", text:"Паприка копчёная: «Дом специй» дешевле нас на 10% на WB — проверить нашу юнит-экономику при цене 179 ₽ (симулятор цены, Этап 3)."},
+          {tone:"blue", text:"Подключить порог уведомлений: снижение цены конкурента > 5% за 7 дней → мгновенный сигнал в Telegram ответственному."},
+        ]}/>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · СРАВНЕНИЕ КАНАЛОВ ===================== */
+function BreakdownTable({data}){
+  return (
+    <table>
+      <thead><tr><th>Статья</th><th className="num">Сумма</th><th className="num">% от базы</th><th>Статус</th></tr></thead>
+      <tbody>
+        {data.map((r,i)=>(
+          <tr key={i}><td>{r.type}</td><td className="num">{mln(r.sum,2)}</td><td className="num"><b>{ru(r.pct,1)} %</b></td>
+            <td>{r.status==="critical"?<Chip tone="red">критично</Chip>:r.status==="alert"?<Chip tone="amber">внимание</Chip>:<Chip tone="green">норма</Chip>}</td></tr>))}
+      </tbody>
+    </table>
+  );
+}
+function S1_Channels(){
+  const flow=MP_OBOROT_GEN.map(r=>({...r, total:+(r.ozon+r.wb+r.yandex).toFixed(1)}));
+  const hdr=(k,name,sub)=>(
+    <div className="ch"><div><h3 style={{display:'flex',alignItems:'center',gap:9}}><MpDot k={k}/>{name}</h3><p>{sub}</p></div></div>);
+  return (
+    <div className="grid">
+      <div className="c4"><div className="card" style={{height:'100%'}}>
+        {hdr("ozon","Удержания Ozon","май · % от GMV 39,3 млн · удержано 73%")}
+        <BreakdownTable data={OZON_BREAKDOWN}/>
+      </div></div>
+      <div className="c4"><div className="card" style={{height:'100%'}}>
+        {hdr("wb","Удержания Wildberries","год · % от GMV 71,3 млн · удержано 36%")}
+        <BreakdownTable data={WB_BREAKDOWN}/>
+      </div></div>
+      <div className="c4"><div className="card" style={{height:'100%'}}>
+        {hdr("yandex","Удержания Яндекс Маркет","период · % от выручки 16,1 млн · удержано 69%")}
+        <BreakdownTable data={YANDEX_BREAKDOWN}/>
+      </div></div>
+
+      <Card col={5} title="Сравнение площадок" subtitle="удержания месяц / год и оборот">
+        <table>
+          <thead><tr><th>Площадка</th><th className="num">GMV / мес</th><th className="num">Уд. месяц</th><th className="num">Уд. год</th></tr></thead>
+          <tbody>
+            {PLATFORMS.map((p,i)=>(
+              <tr key={i}><td><b>{p.name}</b><div style={{fontSize:11.5,color:'var(--muted)',marginTop:2}}>{p.note}</div></td>
+                <td className="num">{mln(p.gmvMonth)}</td><td className="num"><b>{p.heldMonth} %</b></td><td className="num">{p.heldYear} %</td></tr>))}
+          </tbody>
+        </table>
+        <p className="footnote">Структура удержаний разная: у Ozon давит комиссия (35%), у WB и Яндекса — логистика и продвижение.</p>
+      </Card>
+      <Card col={7} gen title="Оборот площадок vs поступления" subtitle="столбцы — GMV по площадкам · чёрная линия — суммарный оборот · красный пунктир — деньги на счёте. Разрыв между ними = удержания МП">
+        <div style={chartBox(280)}>
+          <ResponsiveContainer>
+            <ComposedChart data={flow} margin={{top:6,right:10,left:-14,bottom:0}} barSize={40}>
+              <CartesianGrid {...grid} vertical={false}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[mln(v), {ozon:"Ozon",wb:"WB",yandex:"Яндекс",total:"Суммарный оборот",payout:"Поступило на счёт"}[n]]}/>
+              <Bar dataKey="ozon" stackId="g" fill={MPC.ozon} isAnimationActive={false}/>
+              <Bar dataKey="wb" stackId="g" fill={MPC.wb} isAnimationActive={false}/>
+              <Bar dataKey="yandex" stackId="g" fill={MPC.yandex} radius={[8,8,0,0]} isAnimationActive={false}/>
+              <Line type="monotone" dataKey="total" stroke="#0F1419" strokeWidth={2.5} dot={{r:3}}/>
+              <Line type="monotone" dataKey="payout" stroke="#FF4D4F" strokeWidth={2.5} strokeDasharray="6 4" dot={{r:3}}/>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:MPC.ozon}}/>Ozon</span><span><i style={{background:MPC.wb}}/>WB</span><span><i style={{background:MPC.yandex}}/>Яндекс</span><span><i style={{background:"#0F1419"}}/>Оборот</span><span><i style={{background:"#FF4D4F"}}/>Поступления</span></div>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 1 · СКЛАД ===================== */
+function S1_Stock(){
+  const frozenOver=STOCK_RISK_GEN.filter(r=>r.status==="overstock").reduce((a,b)=>a+b.frozen,0);
+  const riskRows=[...STOCK_RISK_GEN].sort((a,b)=>a.daysToZero-b.daysToZero);
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard gen title="Заканчивается (< 14 дней)" value={STOCK_RISK_GEN.filter(r=>r.status==="low").length+" SKU"} chips={<Chip tone="red">заказать</Chip>} note="риск потери продаж"/>
+        <KCard gen title="Затоваривание (> 180 дней)" value={STOCK_RISK_GEN.filter(r=>r.status==="overstock").length+" SKU"} chips={<Chip tone="blue">излишки</Chip>} note="поставки не нужны"/>
+        <KCard gen title="«Заморожено» в излишках" value={mln(frozenOver,2)} chips={<Chip tone="amber">оборотные средства</Chip>} note="лежит без движения"/>
+        <KCard gen title="Оборачиваемость · Ozon" value="174 дн" chips={<Chip tone="red">цель 60 дн</Chip>} note="в 2,9× выше нормы"/>
+      </div></div>
+
+      <Card col={7} gen title="Сводная таблица остатков" subtitle="остаток и прогноз дней до нуля">
+        <table>
+          <thead><tr><th>SKU</th><th>Канал</th><th className="num">Остаток</th><th className="num">Дней до нуля</th><th>Статус</th></tr></thead>
+          <tbody>
+            {STOCK_GEN.map((r,i)=>(
+              <tr key={i} className={r.status==="critical"?"row-warn":""}><td style={{fontWeight:700}}>{r.sku}</td><td><Ctag>{r.channel}</Ctag></td><td className="num">{ru(r.stock)} ед.</td>
+                <td className="num"><b style={{color:r.status==="critical"?"var(--red)":r.status==="alert"?"var(--amber)":"var(--green)"}}>{r.daysToZero} дн.</b></td>
+                <td>{r.status==="critical"?<Chip tone="red">срочно</Chip>:r.status==="alert"?<Chip tone="amber">скоро</Chip>:<Chip tone="green">в норме</Chip>}</td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+      <Card col={5} gen title="Оборачиваемость по площадкам" subtitle="дней · зелёный пунктир — цель 60 дней">
+        <div style={chartBox(260)}>
+          <ResponsiveContainer>
+            <LineChart data={TURNOVER_MULTI_GEN} margin={{top:6,right:10,left:-14,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" unit=" дн" domain={[40,190]} tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[v+" дней", n==="ozon"?"Ozon":n==="wb"?"WB":"Яндекс"]}/>
+              <ReferenceLine y={TURNOVER_TARGET} stroke="#10B981" strokeDasharray="6 5" label={{value:"цель 60 дн",position:"insideBottomRight",fontSize:11,fill:"#0B5C45"}}/>
+              <Line type="monotone" dataKey="ozon" stroke={MPC.ozon} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="wb" stroke={MPC.wb} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+              <Line type="monotone" dataKey="yandex" stroke={MPC.yandex} strokeWidth={3} dot={false} activeDot={{r:4}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:MPC.ozon}}/>Ozon</span><span><i style={{background:MPC.wb}}/>Wildberries</span><span><i style={{background:MPC.yandex}}/>Яндекс</span></div>
+        <p className="footnote">Норма 45–60 дней. Текущий уровень в 2,5–3× выше нормы по всем площадкам.</p>
+      </Card>
+
+      <Card col={12} gen title="План пополнения и затоваривание" subtitle="когда товар закончится, когда заказывать, и где «заморожены» оборотные средства">
+        <table>
+          <thead><tr><th>SKU</th><th>Канал</th><th className="num">Остаток</th><th className="num">Продаж/день</th><th className="num">Дней до нуля</th><th className="num">Средства</th><th>Заказать</th><th>Статус</th></tr></thead>
+          <tbody>
+            {riskRows.map((r,i)=>(
+              <tr key={i} className={r.status==="low"?"row-warn":""}>
+                <td style={{fontWeight:700}}>{r.sku}</td><td><Ctag>{r.channel}</Ctag></td><td className="num">{ru(r.stock)} ед.</td><td className="num">{r.perDay}</td>
+                <td className="num"><b style={{color:r.status==="low"?"var(--red)":r.status==="overstock"?MPC.ozon:"var(--green)"}}>{r.daysToZero} дн.</b></td>
+                <td className="num">{mln(r.frozen,2)}</td><td style={{fontWeight:600}}>{r.reorderBy}</td>
+                <td>{r.status==="low"?<Chip tone="red">заказать</Chip>:r.status==="overstock"?<Chip tone="blue">затоваривание</Chip>:<Chip tone="green">в норме</Chip>}</td>
+              </tr>))}
+          </tbody>
+        </table>
+        <p className="footnote">«Заказать» — пополнить до даты, иначе уйдём в ноль и потеряем продажи. «Затоваривание» — товар продаётся медленно, оборотные средства заморожены: новые поставки не нужны, цену/промо стоит пересмотреть.</p>
+      </Card>
+
+      <Card col={12} gen title="Задание на отгрузку" subtitle="что и куда отгрузить, чтобы не уйти в ноль">
+        <table>
+          <thead><tr><th>SKU</th><th>Канал</th><th>Склад</th><th className="num">Кол-во</th><th>Срок</th><th>Срочность</th></tr></thead>
+          <tbody>
+            {SHIPMENT_TASK_GEN.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.sku}</td><td><Ctag>{r.channel}</Ctag></td><td>{r.warehouse}</td><td className="num"><b>{ru(r.qty)} ед.</b></td>
+                <td>{r.deadline}</td><td>{r.urgency==="critical"?<Chip tone="red">срочно</Chip>:<Chip tone="amber">скоро</Chip>}</td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 2 · P&L ===================== */
+function PLStatement(){
+  const rows=[
+    { l:"Выручка", v:240.5, p:100, kind:"in" },
+    { l:"Себестоимость", v:-166.0, p:-69.0, kind:"ded" },
+    { l:"Валовая прибыль", v:74.5, p:31.0, kind:"sub" },
+    { l:"Комиссии маркетплейсов", v:-32.2, p:-13.4, kind:"ded" },
+    { l:"Административные расходы", v:-26.7, p:-11.1, kind:"ded" },
+    { l:"EBITDA (операционная прибыль)", v:15.6, p:6.5, kind:"sub" },
+    { l:"Финансовые расходы", v:-5.3, p:-2.2, kind:"ded" },
+    { l:"Прибыль до налога", v:11.1, p:4.6, kind:"sub" },
+    { l:"Налог на прибыль", v:-2.8, p:-1.2, kind:"ded" },
+    { l:"Чистая прибыль", v:8.34, p:3.5, kind:"net" },
+  ];
+  const sumF=(v)=>(v<0?"−":"")+ru(Math.abs(v),1);
+  const pF=(v)=>(v<0?"−":"")+ru(Math.abs(v),1)+" %";
+  return (
+    <table className="pl">
+      <thead><tr><th>Статья</th><th className="num">Сумма, млн ₽</th><th className="num">% от выручки</th></tr></thead>
+      <tbody>
+        {rows.map((r,i)=>(
+          <tr key={i} className={r.kind==="sub"?"pl-sub":r.kind==="net"?"pl-net":""}>
+            <td className={r.kind==="ded"?"ded":""}>{r.kind==="ded"?"− "+r.l:r.l}</td>
+            <td className={"num"+(r.kind==="ded"?" ded":"")}>{sumF(r.v)}</td>
+            <td className={"num"+(r.kind==="ded"?" ded":"")}>{pF(r.p)}</td>
+          </tr>))}
+      </tbody>
+    </table>
+  );
+}
+function S2_PL(){
+  const taxFin = PL.taxPct + PL.finPct;
+  const GAP=[
+    { nm:"Комиссии МП", pp:PL.commissionsPct, c:"#FF4D4F" },
+    { nm:"Админрасходы", pp:PL.adminPct, c:"#F4B740" },
+    { nm:"Финрасходы", pp:PL.finPct, c:"#8B5CF6" },
+    { nm:"Налог", pp:PL.taxPct, c:"#9AA0A8" },
+  ];
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n5" style={{marginBottom:0}}>
+        <KCard title="Выручка · 4 мес" value={mln(PL.revenue)} note="янв–апр 2026"/>
+        <KCard title="Валовая прибыль" value={pct(PL.grossPct)} chips={<Chip tone="green">в норме</Chip>} note="стабильна"/>
+        <KCard title="EBITDA" value={pct(PL.ebitdaPct)} chips={<Chip tone="amber">низкая</Chip>} note={mln(PL.ebitda)+" операционная"}/>
+        <KCard title="Чистая прибыль" value={pct(PL.netPct)} chips={<Chip tone="amber">низкая</Chip>} note={mln(PL.netProfit)+" после налога"}/>
+        <KCard title="Налог + финрасходы" value={pct(taxFin)} note="нагрузка на прибыль"/>
+      </div></div>
+
+      <Card col={7} title="Отчёт о прибылях и убытках (P&L)" subtitle="за 4 мес 2026 · млн ₽ и % от выручки · обновляется ежедневно из 1С"><PLStatement/></Card>
+      <div className="c5" style={{display:'flex',flexDirection:'column',gap:16}}>
+        <Card title="Три уровня рентабельности" subtitle="% от выручки">
+          <div className="cells" style={{gridTemplateColumns:'1fr'}}>
+            {MARGIN_LEVELS.map((m,i)=>(
+              <div className="cell" key={i}><div className="l">{m.level}</div><div className="b">{pct(m.value)}</div><div className="d">{m.note}</div></div>))}
+          </div>
+        </Card>
+        <Card title="Что с мартом" subtitle="разбор провала">
+          <div className="rec" style={{background:"var(--amber-soft)"}}><span className="rtag" style={{background:"#fff",color:"var(--amber-ink)"}}>ФАКТ</span>
+            <div>Март ~0% чистой — единовременная премия и уплата налога (управленческое решение), а не операционная проблема. Валовая маржа марта 31% — в норме.</div></div>
+        </Card>
+      </div>
+
+      <Card col={7} title="Помесячный P&L 2026" subtitle="млн ₽ · март около нуля">
+        <table>
+          <thead><tr><th>Месяц</th><th className="num">Выручка</th><th className="num">Валовая</th><th className="num">EBITDA</th><th className="num">Чистая</th><th className="num">Чист. маржа</th></tr></thead>
+          <tbody>
+            {PL_MONTHLY.map((r,i)=>(
+              <tr key={i} className={r.netMargin<0?"row-warn":""}>
+                <td style={{fontWeight:700}}>{r.month}</td><td className="num">{ru(r.revenue,1)}</td><td className="num">{ru(r.gross,1)}</td>
+                <td className="num">{ru(r.ebitda,1)}</td><td className="num">{ru(r.net,1)}</td>
+                <td className="num"><b style={{color:r.netMargin<0?"var(--red)":r.netMargin<3?"var(--amber)":"var(--green)"}}>{ru(r.netMargin,1)} %</b></td>
+              </tr>))}
+          </tbody>
+        </table>
+      </Card>
+      <Card col={5} title="Структура разрыва маржи" subtitle="от валовой 31,0% до чистой 3,5% · что съедает прибыль">
+        {GAP.map((g,i)=>(
+          <div key={i} style={{display:'flex',alignItems:'center',gap:12,marginBottom:13}}>
+            <div style={{width:130,fontSize:13,fontWeight:600}}>{g.nm}</div>
+            <div style={{flex:1,background:'var(--hairsoft)',height:24,borderRadius:9,overflow:'hidden'}}>
+              <div style={{width:(g.pp/13.4*100)+"%",height:'100%',borderRadius:9,background:g.c}}/></div>
+            <div className="num" style={{width:70,fontWeight:700}}>−{ru(g.pp,1)} пп</div>
+          </div>))}
+        <p className="footnote">Главные «съедатели» — комиссии маркетплейсов (13,4 пп) и админрасходы (11,1 пп).</p>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 2 · КАНАЛЫ И ВЫРУЧКА ===================== */
+const PIE_COLORS=["#10B981","#2A6FDB","#8B5CF6","#F4B740","#9AA0A8"];
+function S2_Channels(){
+  const turnover2025 = CHANNELS.reduce((a,b)=>a+b.revenue,0);
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard title="Оборот · 2025" value={mln(turnover2025,0)} note="все каналы"/>
+        <KCard title="Рост год-к-году" value={"+"+GROWTH_YOY.pct+" %"} chips={<Chip tone="green">устойчивый</Chip>} note={GROWTH_YOY.from+" → "+GROWTH_YOY.to+" млн ₽"}/>
+        <KCard title="Доля e-com" value={pct(ECOM_FLOW.shipShare,0)} note="в отгрузках"/>
+        <KCard title="Живых денег от e-com" value={pct(ECOM_FLOW.cashShare,0)} chips={<Chip tone="amber">кассовый разрыв</Chip>} note={mln(ECOM_FLOW.cashSum,0)+" поступило"}/>
+      </div></div>
+
+      <Card col={5} title="Выручка по каналам" subtitle="доля канала · млн ₽ / год">
+        <div style={chartBox(260)}>
+          <ResponsiveContainer>
+            <PieChart>
+              <Pie data={CHANNELS} dataKey="share" nameKey="name" cx="50%" cy="50%" innerRadius={58} outerRadius={96} paddingAngle={3} cornerRadius={6}>
+                {CHANNELS.map((c,i)=><Cell key={i} fill={PIE_COLORS[i]}/>)}
+              </Pie>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n,p)=>[v+" % · "+mln(p.payload.revenue,0), p.payload.name]}/>
+            </PieChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg">{CHANNELS.map((c,i)=><span key={i}><i style={{background:PIE_COLORS[i]}}/>{c.name} · {c.share}%</span>)}</div>
+      </Card>
+      <Card col={7} title="Динамика выручки 2026" subtitle="помесячно, млн ₽">
+        <div style={chartBox(260)}>
+          <ResponsiveContainer>
+            <AreaChart data={PL_MONTHLY} margin={{top:6,right:10,left:-14,bottom:0}}>
+              <defs><linearGradient id="revG" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stopColor="#0F1419" stopOpacity={0.14}/><stop offset="100%" stopColor="#0F1419" stopOpacity={0.01}/></linearGradient></defs>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v)=>[mln(v),"Выручка"]}/>
+              <Area type="monotone" dataKey="revenue" stroke="#0F1419" strokeWidth={3} fill="url(#revG)" dot={{r:4,fill:"#0F1419"}}/>
+            </AreaChart>
+          </ResponsiveContainer>
+        </div>
+      </Card>
+
+      <Card col={7} title="Отгрузки vs живые деньги" subtitle="оборот не равен деньгам на счёте">
+        <div style={{display:'flex',gap:14,flexWrap:'wrap'}}>
+          <div className="cell" style={{flex:1,minWidth:150}}><div className="l">Отгрузок на МП</div><div className="b">{ECOM_FLOW.shipShare} %</div></div>
+          <div className="cell" style={{flex:1,minWidth:150}}><div className="l">Денежного потока</div><div className="b" style={{color:'var(--amber-ink)'}}>{ECOM_FLOW.cashShare} %</div></div>
+          <div className="cell" style={{flex:1,minWidth:150}}><div className="l">Поступило с e-com</div><div className="b">{mln(ECOM_FLOW.cashSum,0)}</div></div>
+        </div>
+        <div className="insight">71% отгрузок на маркетплейсах превращаются лишь в 30% живых денег — площадки удерживают значительную часть оборота.</div>
+      </Card>
+      <Card col={5} title="Рекомендации">
+        <Recs items={[
+          {tone:"green", text:"Развивать высокомаржинальный бренд (средняя маржа 33,5%) против низкомаржинального СТМ."},
+          {tone:"amber", text:"Учитывать кассовый разрыв: рост отгрузок e-com не равен росту денег на счёте."},
+        ]}/>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 2 · МАРЖА СТМ ===================== */
+function S2_Stm(){
+  const avg=STM_MARGIN_GEN.reduce((a,b)=>a+b.avgMargin,0)/STM_MARGIN_GEN.length;
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard gen title="Сетей со СТМ" value={STM_MARGIN_GEN.length} note="контрактное производство"/>
+        <KCard gen title="Средняя маржа СТМ" value={pct(avg)} chips={<Chip tone="amber">низкая</Chip>} note="по сетям"/>
+        <KCard gen title="Доля СТМ в объёме" value={pct(30,0)} note="≈ оценка"/>
+        <KCard title="Маржа бренда" value={pct(BRAND_MARGIN.avg)} chips={<Chip tone="green">выше СТМ</Chip>} note="для сравнения"/>
+      </div></div>
+
+      <Card col={7} gen title="Маржа СТМ по сетям" subtitle="сеть, число SKU, средняя маржа">
+        <table>
+          <thead><tr><th>Сеть</th><th className="num">SKU</th><th className="num">Средняя маржа</th><th>Статус</th></tr></thead>
+          <tbody>
+            {STM_MARGIN_GEN.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.network}</td><td className="num">{r.skuCount}</td><td className="num"><b>{r.avgMargin} %</b></td>
+                <td>{r.status==="low"?<Chip tone="amber">низкая</Chip>:<Chip tone="green">в норме</Chip>}</td></tr>))}
+          </tbody>
+        </table>
+      </Card>
+      <div className="c5" style={{display:'flex',flexDirection:'column',gap:16}}>
+        <Card title="Почему это важно">
+          <div className="rec" style={{background:"var(--amber-soft)"}}><span className="rtag" style={{background:"#fff",color:"var(--amber-ink)"}}>КОНТЕКСТ</span>
+            <div>Сейчас маржа СТМ не считается. Раньше считал штатный экономист — инструмент показывал, где бизнес проваливается. С его уходом расчёт утрачен. Здесь он восстанавливается автоматически из 1С.</div></div>
+        </Card>
+        <Card gen title="Рекомендации">
+          <Recs items={[
+            {tone:"red", text:"Перекрёсток: маржа 8% при 110 SKU — пересмотреть цену или ассортимент."},
+            {tone:"amber", text:"X5 (11%) и Лента (12%): низкая маржа на больших объёмах — переговоры."},
+            {tone:"green", text:"Самокат и Вкусвилл (15–18%) — приоритет на развитие."},
+          ]}/>
+        </Card>
+      </div>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 2 · ПРОИЗВОДСТВО ===================== */
+function S2_Production(){
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard title="Объём производства" value={ru(PRODUCTION.units,1)+" млн"} note="единиц продукции"/>
+        <KCard title="Партий за период" value={ru(PRODUCTION.batches)} note={"≈ "+PRODUCTION.skuCount+" SKU в производстве"}/>
+        <KCard title="Простои" value={pct(PRODUCTION.downtimePct)} chips={<Chip tone="amber">внимание</Chip>} note={PRODUCTION.downtimeHours+" ч из "+ru(PRODUCTION.totalHours)+" ч"}/>
+        <KCard title="Главный простой" value="Самокат · 73 ч" chips={<Chip tone="red">критично</Chip>} note="две трети всех потерь"/>
+      </div></div>
+
+      <Card col={7} title="Простои по линиям" subtitle="часов за период">
+        <div style={chartBox(240)}>
+          <ResponsiveContainer>
+            <BarChart data={PRODUCTION.downtimeByLine} layout="vertical" margin={{top:4,right:40,left:12,bottom:0}}>
+              <CartesianGrid {...grid} horizontal={false}/>
+              <XAxis type="number" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis type="category" dataKey="line" tick={{fontSize:12,fontWeight:700}} stroke="#B6BBC4" width={76} tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v)=>[v+" ч","Простой"]}/>
+              <Bar dataKey="hours" fill="#F4B740" radius={[0,8,8,0]} barSize={22} isAnimationActive={false} label={{position:"right",formatter:(v)=>v?v+" ч":"",fontSize:11,fontWeight:700,fill:"#7A4E00"}}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="rec" style={{background:"var(--amber-soft)",marginTop:8}}><span className="rtag" style={{background:"#fff",color:"var(--amber-ink)"}}>СИГНАЛ</span>
+          <div>Самокат — 73 ч, две трети всех простоев. Первый кандидат на разбор.</div></div>
+      </Card>
+      <Card col={5} gen title="Учёт брака по причинам" subtitle="брак сейчас не фиксируется — новый показатель · потери, тыс ₽">
+        <table>
+          <thead><tr><th>Причина</th><th className="num">Кол-во</th><th className="num">Потери</th><th>Статус</th></tr></thead>
+          <tbody>
+            {DEFECTS_GEN.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.reason}</td><td className="num">{ru(r.count)} шт</td><td className="num"><b>{tys(r.costRub)}</b></td>
+                <td>{r.status==="critical"?<Chip tone="red">критично</Chip>:r.status==="alert"?<Chip tone="amber">внимание</Chip>:<Chip tone="green">норма</Chip>}</td></tr>))}
+            <tr><td style={{fontWeight:800}}>Итого</td><td className="num"><b>{ru(DEFECTS_GEN.reduce((a,b)=>a+b.count,0))} шт</b></td><td className="num"><b>{tys(DEFECTS_GEN.reduce((a,b)=>a+b.costRub,0))}</b></td><td></td></tr>
+          </tbody>
+        </table>
+      </Card>
+
+      <Card col={7} title="Фонд оплаты труда" subtitle="за 4 мес 2026, млн ₽">
+        <div className="cells" style={{gridTemplateColumns:'repeat(3,1fr)'}}>
+          <div className="cell"><div className="l">Производство</div><div className="b">{mln(PAYROLL.production4m)}</div></div>
+          <div className="cell"><div className="l">Администрация</div><div className="b">{mln(PAYROLL.admin4m)}</div></div>
+          <div className="cell"><div className="l">В среднем / мес</div><div className="b">{mln(PAYROLL.monthly,2)}</div></div>
+        </div>
+      </Card>
+      <Card col={5} title="Рекомендации">
+        <Recs items={[
+          {tone:"red", text:"Разобрать простои линии «Самокат» — 73 ч (две трети всех потерь производства)."},
+          {tone:"amber", text:"Внедрить учёт брака с фиксацией причины оператором: ≈176 тыс ₽ потерь сейчас не видны."},
+        ]}/>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 2 · КОММУНИКАЦИЯ (INBOX) ===================== */
+const COMM_MSGS_GEN = [
+  { id:1, from:"Отдел продаж", who:"М. Соколова", ava:["var(--lime)","var(--lime-ink)","МС"], dept:"sales", time:"09:14",
+    subj:"Промо «Приправа для курицы 330г» с 15.06",
+    preview:"Согласовали акцию с сетью, ожидаемый объём +40%. Проверьте сырьё и мощности…",
+    text:"Коллеги, добрый день! Согласовали промо по «Приправа для курицы 330г» с 15.06, ожидаемый рост объёма +40%. Прошу проверить запас сырья и свободные мощности линий — успеваем ли произвести партию до старта акции?",
+    tags:[["lime","Горячий"],["blue","Промо"],["gray","Производство"]],
+    ai:"AI: маршрутизировано → Производство · приоритет высокий",
+    actions:["AI: предложить ответ","Проверить план производства","Передать"] },
+  { id:2, from:"Склад", who:"Д. Орлов", ava:["var(--blue-soft)","var(--blue-ink)","ДО"], dept:"stock", time:"11:32",
+    subj:"Заканчиваются этикетки «Куркума 250г»",
+    preview:"Остаток этикеток на 4 рабочих дня. Под угрозой заказ на 18.06…",
+    text:"Внимание: остаток этикеток для «Куркума молотая 250г» — на 4 рабочих дня. Если не дозаказать сегодня-завтра, под угрозой производственный заказ на 18.06. Поставщик возит за 7 дней.",
+    tags:[["red","Срочно"],["amber","Упаковка"],["gray","Закупки"]],
+    ai:"AI: маршрутизировано → Закупки · дедлайн 11.06",
+    actions:["AI: сформировать заказ","Слоты поставщика","Передать"] },
+  { id:3, from:"Система · 1С", who:"План производства", ava:["var(--ink)","#fff","1С"], dept:"system", time:"14:00",
+    subj:"План производства на неделю сформирован",
+    preview:"План на 24 партии готов, ожидает подтверждения мастера…",
+    text:"План производства на неделю 10–16.06 сформирован автоматически: 24 партии, 18 SKU, загрузка линий 84%. Ожидает подтверждения мастера смены. После подтверждения уйдёт на линии и в закупки.",
+    tags:[["green","План"],["gray","Подтверждение"]],
+    ai:"AI: проверено — конфликтов мощностей нет",
+    actions:["Подтвердить план","Открыть план","Передать"] },
+  { id:4, from:"Закупки", who:"А. Гусев", ava:["var(--lilac-soft)","var(--lilac-ink)","АГ"], dept:"purch", time:"вчера",
+    subj:"Перец чёрный: импортная партия сдвигается",
+    preview:"Поставщик сдвинул отгрузку на 5 дней. Буфера хватает, но…",
+    text:"Поставщик по чёрному перцу сдвинул отгрузку на 5 дней (таможня). Страхового буфера хватает на текущий план, но если промо по смесям подтвердится — нужен дозаказ 200 кг локально.",
+    tags:[["amber","Импорт"],["gray","Сырьё"]],
+    ai:"AI: связано с промо из сообщения «Отдел продаж · 09:14»",
+    actions:["AI: рассчитать потребность","Ответить","Передать"] },
+];
+const COMM_CHANNELS=[
+  ["all","Все отделы", I.mail, "var(--hairsoft)","var(--inksoft)"],
+  ["sales","Продажи", I.user, "var(--lime)","var(--lime-ink)"],
+  ["stock","Склад", I.boxi, "var(--blue-soft)","var(--blue-ink)"],
+  ["purch","Закупки", I.cart, "var(--lilac-soft)","var(--lilac-ink)"],
+  ["system","Система · 1С", I.gear, "var(--hairsoft)","var(--inksoft)"],
+];
+function S2_Comm(){
+  const [chan,setChan]=useState("all");
+  const [sel,setSel]=useState(1);
+  const list=COMM_MSGS_GEN.filter(m=>chan==="all"||m.dept===chan);
+  const msg=COMM_MSGS_GEN.find(m=>m.id===sel) || list[0];
+  const cnt=(k)=> k==="all"?COMM_MSGS_GEN.length:COMM_MSGS_GEN.filter(m=>m.dept===k).length;
+  return (
+    <div className="grid">
+      <div className="c12"><div className="card tight"><div className="inbox">
+        {/* каналы */}
+        <div>
+          <div className="chanlist">
+            {COMM_CHANNELS.map(([k,n,ic,bg,fg])=>(
+              <button key={k} className={"chan"+(chan===k?" active":"")} onClick={()=>{setChan(k);}}>
+                <span className="cic" style={{background:chan===k?"rgba(255,255,255,.14)":bg,color:chan===k?"#fff":fg}}>{ic}</span>
+                {n}<span className="cnt">{cnt(k)}</span>
+              </button>))}
+          </div>
+          <div className="chanhdr">AI-ПРАВИЛА</div>
+          <div className="chanlist">
+            {[["green","Промо → производство",2],["amber","Дефицит упаковки → закупки",1],["red","Срыв заказа → эскалация",0]].map(([c,n,v],i)=>(
+              <div key={i} className="chan" style={{cursor:'default'}}>
+                <span style={{width:9,height:9,borderRadius:99,background:`var(--${c})`,marginLeft:12,flexShrink:0}}/>
+                <span style={{fontSize:12.5}}>{n}</span><span className="cnt">{v}</span>
+              </div>))}
+          </div>
+        </div>
+        {/* список диалогов */}
+        <div style={{borderLeft:'1px solid var(--hairsoft)',borderRight:'1px solid var(--hairsoft)',padding:'0 12px'}}>
+          <div className="search" style={{boxShadow:'none',background:'var(--hairsoft)',marginBottom:10}}>{I.search}Поиск по сообщениям…</div>
+          {list.map(m=>(
+            <div key={m.id} className={"dlg"+(msg&&msg.id===m.id?" active":"")} onClick={()=>setSel(m.id)}>
+              <div className="dh"><b>{m.from}</b><span>{m.time}</span></div>
+              <div className="ds">{m.subj}</div>
+              <div className="dp">{m.preview}</div>
+              <div className="dtags">{m.tags.map(([t,n],i)=><Chip key={i} tone={t}>{n}</Chip>)}</div>
+            </div>))}
+        </div>
+        {/* тред */}
+        {msg && <div className="thread">
+          <div className="thr-head">
+            <div className="thr-ava" style={{background:msg.ava[0],color:msg.ava[1]}}>{msg.ava[2]}</div>
+            <div><div className="tn">{msg.from}</div><div className="ts">{msg.who} · {msg.time}</div></div>
+            <span className="limebadge" style={{marginLeft:'auto'}}><i/>{msg.ai}</span>
+          </div>
+          <div style={{display:'flex',gap:7,marginTop:14,flexWrap:'wrap'}}>{msg.tags.map(([t,n],i)=><Chip key={i} tone={t}>{n}</Chip>)}</div>
+          <div className="bubble">{msg.text}</div>
+          <div className="bub-meta">{msg.from} · {msg.time} · доставлено в Telegram-каналы отделов</div>
+          <div className="yourturn">— ваша очередь ответить —</div>
+          <div className="thr-actions">
+            {msg.actions.map((a,i)=>(
+              <button key={i} className={"act"+(i===0?" lime":"")}>{i===0?I.zap:i===msg.actions.length-1?I.send:I.ok}{a}</button>))}
+          </div>
+        </div>}
+      </div></div></div>
+      <p className="footnote c12" style={{marginTop:-6}}>{GEN_NOTE}. Имитация центра коммуникаций: события из 1С, склада и продаж приходят в одно окно и дублируются в Telegram-каналы отделов.</p>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 3 · СИМУЛЯТОР ЦЕНЫ ===================== */
+function S3_Sim(){
+  const [d,setD]=useState(0);
+  const S=PRICE_SIM_GEN;
+  const calc=(x)=>{
+    const price=S.basePrice*(1+x/100), marginAbs=price-S.baseCost, marginPct=marginAbs/price*100;
+    const volume=Math.max(0,S.baseVolume*(1+S.elasticity*(x/100)));
+    return {price, marginAbs, marginPct, volume, revenue:price*volume, profit:marginAbs*volume};
+  };
+  const cur=calc(d), baseProfit=calc(0).profit;
+  const profitDelta=(cur.profit-baseProfit)/baseProfit*100;
+  const curve=[]; for(let x=-30;x<=30;x+=5){const c=calc(x);curve.push({price:Math.round(c.price),profit:+(c.profit/1e6).toFixed(3)});}
+  const scen=[-10,0,10,20].map(x=>({d:x, ...calc(x)}));
+  return (
+    <div className="grid">
+      <Card col={12} gen title="Симулятор цены" subtitle="последствия изменения цены до того, как менять её на площадке">
+        <div className="slidehead">
+          <div style={{fontSize:13.5,color:'var(--muted)',fontWeight:600}}>Товар: <b style={{color:'var(--ink)'}}>{S.product}</b> · цена {ru(S.basePrice)} ₽ · себестоимость {ru(S.baseCost)} ₽</div>
+          <div className="big">{d>0?"+":""}{ru(d)} %</div>
+        </div>
+        <input type="range" min="-30" max="30" step="1" value={d} onChange={e=>setD(Number(e.target.value))} style={{marginTop:10}}/>
+        <div className="krow n4" style={{marginTop:16,marginBottom:0}}>
+          <KCard title="Новая цена" value={ru(cur.price)+" ₽"} note={"было "+ru(S.basePrice)+" ₽"}/>
+          <KCard title="Маржа" value={ru(cur.marginPct,1)+" %"} chips={<Chip tone="green">точный расчёт</Chip>} note={ru(cur.marginAbs)+" ₽ с единицы"}/>
+          <KCard title="Прогноз оборота" value={ru(Math.round(cur.volume))+" шт"} chips={<Chip tone="amber">оценка *</Chip>} note={"было "+ru(S.baseVolume)+" шт"}/>
+          <KCard title="Прибыль / мес" value={mln(cur.profit/1e6,2)} chips={<DChip d={+profitDelta.toFixed(1)} unit="%" betterUp={true} label="к базе"/>}/>
+        </div>
+        <div style={{...chartBox(230),marginTop:18}}>
+          <ResponsiveContainer>
+            <LineChart data={curve} margin={{top:6,right:12,left:-10,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis type="number" dataKey="price" tick={ax} stroke="#B6BBC4" unit=" ₽" domain={['dataMin','dataMax']} tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" unit=" млн" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v)=>[mln(v,2),"Прибыль / мес"]} labelFormatter={(l)=>"Цена "+ru(l)+" ₽"}/>
+              <ReferenceLine x={Math.round(cur.price)} stroke="#0F1419" strokeDasharray="5 5" label={{value:"текущая",position:"top",fontSize:11,fill:"#0F1419"}}/>
+              <Line type="monotone" dataKey="profit" stroke="#10B981" strokeWidth={3} dot={{r:3}}/>
+            </LineChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="grouphdr">Сценарии</div>
+        <table>
+          <thead><tr><th>Сценарий</th><th className="num">Цена</th><th className="num">Маржа</th><th className="num">Оборот / мес *</th><th className="num">Прибыль / мес *</th></tr></thead>
+          <tbody>
+            {scen.map((s,i)=>(
+              <tr key={i} style={s.d===0?{background:"var(--hairsoft)"}:{}}>
+                <td style={{fontWeight:800}}>{s.d===0?"Текущая":(s.d>0?"+":"")+s.d+" %"}</td>
+                <td className="num">{ru(s.price)} ₽</td><td className="num">{ru(s.marginPct,1)} %</td>
+                <td className="num">{mln(s.revenue/1e6,2)}</td><td className="num"><b>{mln(s.profit/1e6,2)}</b></td>
+              </tr>))}
+          </tbody>
+        </table>
+        <p className="footnote">Маржа — точный расчёт (цена − себестоимость). Оборот и прибыль — оценка по коэффициенту эластичности ({S.elasticity}); точность вырастет на реальных данных продаж.</p>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 3 · ПРОГНОЗ СПРОСА ===================== */
+function S3_Demand(){
+  const data=DEMAND_FORECAST_GEN.map(d=>({...d}));
+  let li=-1; data.forEach((d,i)=>{ if(d.actual!=null) li=i; });
+  if(li>=0){ data[li].forecast=data[li].actual; data[li].low=data[li].actual; data[li].high=data[li].actual; }
+  const fc=DEMAND_FORECAST_GEN.filter(r=>r.forecast!=null);
+  return (
+    <div className="grid">
+      <Card col={8} gen title="Прогноз спроса" subtitle="факт (янв–апр, реальная выручка) + прогнозная зона (май–июль) с доверительным интервалом, млн ₽">
+        <div style={chartBox(300)}>
+          <ResponsiveContainer>
+            <ComposedChart data={data} margin={{top:6,right:10,left:-14,bottom:0}}>
+              <CartesianGrid {...grid}/>
+              <XAxis dataKey="month" tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>{const m={actual:"Факт",forecast:"Прогноз",high:"Верхняя граница",low:"Нижняя граница"};return v==null?["—",m[n]]:[mln(v),m[n]];}}/>
+              <Area type="monotone" dataKey="high" stroke="none" fill="#10B981" fillOpacity={0.13} connectNulls/>
+              <Area type="monotone" dataKey="low" stroke="none" fill="#F4F5F7" fillOpacity={1} connectNulls/>
+              <Line type="monotone" dataKey="actual" stroke="#0F1419" strokeWidth={3} dot={{r:3}} connectNulls/>
+              <Line type="monotone" dataKey="forecast" stroke="#10B981" strokeWidth={3} strokeDasharray="7 5" dot={{r:3}} connectNulls/>
+            </ComposedChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:"#0F1419"}}/>Факт</span><span><i style={{background:"#10B981"}}/>Прогноз</span></div>
+      </Card>
+      <Card col={4} gen title="Прогноз по сценариям" subtitle="риск дефицита и избытка, млн ₽">
+        <table>
+          <thead><tr><th>Месяц</th><th className="num">Низ</th><th className="num">База</th><th className="num">Верх</th></tr></thead>
+          <tbody>
+            {fc.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.month}</td><td className="num">{ru(r.low)}</td><td className="num"><b>{ru(r.forecast)}</b></td><td className="num">{ru(r.high)}</td></tr>))}
+          </tbody>
+        </table>
+        <p className="footnote">Нижняя граница — план без риска избытка; верхняя — закладка мощностей под пик.</p>
+      </Card>
+      <Card col={12} title="Наша позиция по прогнозированию">
+        <div className="rec" style={{background:"var(--mint-soft)"}}><span className="rtag" style={{background:"#fff",color:"var(--mint-deep)"}}>МЕТОД</span>
+          <div>Прогноз строится на инструментах, устойчивых к нерегулярным факторам (промо, сезонные вводы, нестабильные планы сетей). Чисто статистическое прогнозирование спроса в условиях частых «чёрных лебедей» не применяется — модель консервативна.</div></div>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 3 · ПРОГНОЗ ПРОДАЖ НА МЕСЯЦ ===================== */
+function S3_MonthForecast(){
+  const base=MONTH_FORECAST_GEN.reduce((a,b)=>a+b.base,0);
+  const low=MONTH_FORECAST_GEN.reduce((a,b)=>a+b.low,0);
+  const high=MONTH_FORECAST_GEN.reduce((a,b)=>a+b.high,0);
+  const delta=(base-PL_MONTHLY[3].revenue)/PL_MONTHLY[3].revenue*100;
+  return (
+    <div className="grid">
+      <div className="c12"><div className="krow n4" style={{marginBottom:0}}>
+        <KCard gen title="Прогноз выручки · июнь" value={mln(base)} chips={<DChip d={+delta.toFixed(1)} unit="%" betterUp={true} label="к апрелю"/>} note="базовый сценарий"/>
+        <KCard gen title="Нижняя граница" value={mln(low)} note="консервативный план"/>
+        <KCard gen title="Верхняя граница" value={mln(high)} note="закладка мощностей"/>
+        <KCard gen title="Доверит. интервал" value={"±"+ru((high-low)/2/base*100,0)+" %"} note="разброс прогноза"/>
+      </div></div>
+      <Card col={7} gen title="Прогноз продаж на месяц по категориям" subtitle="июнь 2026 · база и границы, млн ₽">
+        <div style={chartBox(280)}>
+          <ResponsiveContainer>
+            <BarChart data={MONTH_FORECAST_GEN} margin={{top:6,right:10,left:-14,bottom:0}} barGap={4}>
+              <CartesianGrid {...grid} vertical={false}/>
+              <XAxis dataKey="category" tick={{fontSize:11.5,fontWeight:700}} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <YAxis tick={ax} stroke="#B6BBC4" tickLine={false} axisLine={false}/>
+              <Tooltip contentStyle={tipStyle} formatter={(v,n)=>[mln(v), n==="low"?"Низ":n==="base"?"База":"Верх"]}/>
+              <Bar dataKey="low" fill="#C9CED6" radius={[6,6,0,0]} barSize={20} isAnimationActive={false}/>
+              <Bar dataKey="base" fill="#0F1419" radius={[6,6,0,0]} barSize={20} isAnimationActive={false} label={{position:"top",formatter:(v)=>ru(v,1),fontSize:11,fontWeight:800,fill:"#0F1419"}}/>
+              <Bar dataKey="high" fill="#10B981" radius={[6,6,0,0]} barSize={20} isAnimationActive={false}/>
+            </BarChart>
+          </ResponsiveContainer>
+        </div>
+        <div className="leg"><span><i style={{background:"#C9CED6"}}/>Низ</span><span><i style={{background:"#0F1419"}}/>База</span><span><i style={{background:"#10B981"}}/>Верх</span></div>
+      </Card>
+      <Card col={5} gen title="Детализация прогноза" subtitle="млн ₽ · от чего отталкиваться в плане">
+        <table>
+          <thead><tr><th>Категория</th><th className="num">Низ</th><th className="num">База</th><th className="num">Верх</th></tr></thead>
+          <tbody>
+            {MONTH_FORECAST_GEN.map((r,i)=>(
+              <tr key={i}><td style={{fontWeight:700}}>{r.category}</td><td className="num">{ru(r.low,1)}</td><td className="num"><b>{ru(r.base,1)}</b></td><td className="num">{ru(r.high,1)}</td></tr>))}
+            <tr style={{background:"var(--hairsoft)"}}><td style={{fontWeight:800}}>Итого</td><td className="num"><b>{ru(low,1)}</b></td><td className="num"><b>{ru(base,1)}</b></td><td className="num"><b>{ru(high,1)}</b></td></tr>
+          </tbody>
+        </table>
+        <p className="footnote">База — ориентир для плана производства; низ страхует от избытка, верх — от дефицита под пик.</p>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== ЭТАП 3 · ПРОГНОЗ ЗАКУПОК ===================== */
+function S3_Purchase(){
+  const [node,setNode]=useState("plan");
+  const longR=PURCHASE_FORECAST_GEN.filter(r=>r.type==="долгое");
+  const fastR=PURCHASE_FORECAST_GEN.filter(r=>r.type==="быстрое");
+  const rows=(arr)=>arr.map((r,i)=>(
+    <tr key={i}><td style={{fontWeight:700}}>{r.material}</td><td className="num">{ru(r.current)} кг</td><td className="num">{ru(r.forecast)} кг</td><td className="num"><b>{ru(r.order)} кг</b></td>
+      <td>{r.urgency==="under_order"?<Chip tone="red">дозаказ</Chip>:<Chip tone="amber">буфер</Chip>}</td></tr>));
+  return (
+    <div className="grid">
+      <Card col={12} gen title="Прогноз потребности в сырье" subtitle="на горизонт с учётом сезонности · разделение по типу поставки">
+        <div className="grouphdr">Долгое сырьё — импорт, спецпозиции (страховой буфер по прогнозу)</div>
+        <table><thead><tr><th>Материал</th><th className="num">Текущий расход</th><th className="num">Прогноз</th><th className="num">К заказу</th><th>Срочность</th></tr></thead><tbody>{rows(longR)}</tbody></table>
+        <div className="grouphdr">Быстрое сырьё — локальное (под заказ)</div>
+        <table><thead><tr><th>Материал</th><th className="num">Текущий расход</th><th className="num">Прогноз</th><th className="num">К заказу</th><th>Срочность</th></tr></thead><tbody>{rows(fastR)}</tbody></table>
+      </Card>
+      <Card col={12} gen title="Связка: План → Производство → Сырьё" subtitle="изменение в плане продаж подсвечивает последствия по цепочке">
+        <div className="chain">
+          <div className={"cnode cn-a"+(node==="plan"?" hot":"")} onMouseEnter={()=>setNode("plan")}>
+            <div className="tag" style={{color:'var(--lilac-ink)'}}>ПЛАН ПРОДАЖ</div>
+            <h4>Промо +40% · «Приправа для курицы 330г»</h4>
+            <p>Маркетинг ставит акцию с 15.06. Спрос вырастет — нужно проверить, выдержит ли цепочка.</p>
+          </div>
+          <div className="carrow">→</div>
+          <div className={"cnode cn-b"+(node==="prod"?" hot":"")} onMouseEnter={()=>setNode("prod")}>
+            <div className="tag" style={{color:'var(--blue-ink)'}}>ПРОИЗВОДСТВО</div>
+            <h4>+58 партий · загрузка линии «Самокат» 92%</h4>
+            <p>Требуется доп. смена 14–15.06. Риск простоя других SKU — пересборка графика.</p>
+          </div>
+          <div className="carrow">→</div>
+          <div className={"cnode cn-c"+(node==="raw"?" hot":"")} onMouseEnter={()=>setNode("raw")}>
+            <div className="tag" style={{color:'var(--amber-ink)'}}>СЫРЬЁ И УПАКОВКА</div>
+            <h4>Паприка +320 кг · этикетка +18 тыс шт</h4>
+            <p>Заказ поставщику до 09.06, иначе срыв промо. Этикетка — узкое место.</p>
+          </div>
+        </div>
+        <p className="footnote">Наведите на блок, чтобы увидеть, как изменение плана продаж распространяется по цепочке до закупок сырья.</p>
+      </Card>
+      <Card col={12} gen title="Рекомендации по заказам">
+        <Recs items={[
+          {tone:"red", text:"Соль: оформить дозаказ 1 250 кг в ближайшие дни (быстрая локальная поставка)."},
+          {tone:"amber", text:"Перец чёрный и куркума (импорт): заложить буфер 450 и 210 кг — заказ заранее с учётом срока поставки."},
+          {tone:"blue", text:"Под промо «Приправа для курицы» заказать паприку +320 кг и этикетку +18 тыс шт до 09.06."},
+        ]}/>
+      </Card>
+    </div>
+  );
+}
+
+/* ===================== НАВИГАЦИЯ + APP ===================== */
+const STAGES=[
+  { id:1, name:"Этап 1 · Маркетплейсы", icon:I.cart, subs:[
+    { key:"home", name:"Главная", C:S1_Home, badge:"54,1 млн ₽ оборот · май", crumb:"Главная" },
+    { key:"products", name:"Товарная аналитика", gen:true, C:S1_Products, badge:"ABC · каналы · категории", crumb:"Товарная аналитика" },
+    { key:"unit", name:"Юнит-экономика SKU", gen:true, C:S1_Unit, badge:"прибыль с каждой единицы", crumb:"Юнит-экономика" },
+    { key:"ads", name:"Реклама", C:S1_Ads, badge:"бюджет 8 млн ₽ · ×11 за год", crumb:"Реклама" },
+    { key:"prices", name:"Цены конкурентов", gen:true, C:S1_Prices, badge:"2 сигнала демпинга", crumb:"Цены конкурентов" },
+    { key:"channels", name:"Сравнение каналов", C:S1_Channels, badge:"Ozon 73% · WB 43% · ЯМ 67%", crumb:"Сравнение каналов" },
+    { key:"stock", name:"Склад", gen:true, C:S1_Stock, badge:"2 SKU на исходе · 3,6 млн ₽ в излишках", crumb:"Склад" },
+  ]},
+  { id:2, name:"Этап 2 · Управленческий контур", icon:I.pulse, subs:[
+    { key:"pl", name:"P&L и рентабельность", C:S2_PL, badge:"чистая прибыль 3,5%", crumb:"P&L" },
+    { key:"channels2", name:"Каналы и выручка", C:S2_Channels, badge:"+67% год к году", crumb:"Каналы и выручка" },
+    { key:"stm", name:"Маржа СТМ", gen:true, C:S2_Stm, badge:"возвращаем утраченный контроль", crumb:"Маржа СТМ" },
+    { key:"production", name:"Производство", C:S2_Production, badge:"1,5 млн ед. · простои 5,3%", crumb:"Производство" },
+    { key:"comm", name:"Коммуникация отделов", gen:true, C:S2_Comm, badge:"4 события · 2 требуют действий", crumb:"Коммуникация" },
+  ]},
+  { id:3, name:"Этап 3 · Прогнозная аналитика", icon:I.crystal, subs:[
+    { key:"sim", name:"Симулятор цены", gen:true, C:S3_Sim, badge:"цена → маржа → прибыль", crumb:"Симулятор цены" },
+    { key:"demand", name:"Прогноз спроса", gen:true, C:S3_Demand, badge:"горизонт 3 месяца", crumb:"Прогноз спроса" },
+    { key:"monthfc", name:"Прогноз продаж на месяц", gen:true, C:S3_MonthForecast, badge:"июнь · 4,4 млн ₽ база", crumb:"Прогноз на месяц" },
+    { key:"purchase", name:"Прогноз закупок", gen:true, C:S3_Purchase, badge:"сырьё под план и сезонность", crumb:"Прогноз закупок" },
+  ]},
+];
+
+function App(){
+  const [stage,setStage]=useState(1);
+  const [subKey,setSubKey]=useState("home");
+  const stageObj=STAGES.find(s=>s.id===stage);
+  const subObj=stageObj.subs.find(s=>s.key===subKey) || stageObj.subs[0];
+  const Active=subObj.C;
+  const selectStage=(id)=>{ setStage(id); setSubKey(STAGES.find(s=>s.id===id).subs[0].key); window.scrollTo(0,0); };
+  const go=(stageId,key)=>{ setStage(stageId); setSubKey(key); window.scrollTo(0,0); };
+  return (
+    <div className="shell">
+      {/* левая панель — этапы */}
+      <div className="rail">
+        {STAGES.map(s=>(
+          <button key={s.id} className={"railbtn"+(stage===s.id?" active":"")} onClick={()=>selectStage(s.id)}>
+            {s.icon}<span className="railnum">{s.id}</span><span className="tip">{s.name}</span>
+          </button>))}
+        <div style={{flex:1,minHeight:30}}/>
+        <button className="railbtn" title="Поддержка">{I.head}<span className="tip">Поддержка Vileo</span></button>
+      </div>
+
+      {/* верхняя панель */}
+      <div className="topbar">
+        <div className="logo">АГ</div>
+        <div className="nav">
+          {stageObj.subs.map(sb=>(
+            <button key={sb.key} className={"navpill"+(subKey===sb.key?" active":"")} onClick={()=>{setSubKey(sb.key);window.scrollTo(0,0);}}>
+              {sb.name}{sb.gen && <span className="ast">*</span>}
+            </button>))}
+        </div>
+        <div className="search">{I.search}Найти SKU, канал, отчёт…<span className="kbd">⌘K</span></div>
+        <div className="live"><span className="dot"/>Live</div>
+        <div className="avatars">
+          {[["АК","var(--lime)","var(--lime-ink)"],["МС","var(--blue-soft)","var(--blue-ink)"],["ЕГ","var(--red-soft)","var(--red-ink)"],["+5","var(--ink)","#fff"]].map(([t,bg,fg],i)=>(
+            <div key={i} className="ava" style={{background:bg,color:fg}}>{t}</div>))}
+        </div>
+        <button className="iconbtn">{I.bell}<span className="reddot"/></button>
+        <button className="iconbtn">{I.mail}</button>
+        <div className="profile">ИП</div>
+      </div>
+
+      {/* хлебные крошки + шапка раздела */}
+      <div className="crumbs">
+        Главная <span>›</span> <b>{stageObj.name}</b> <span>›</span> {subObj.crumb}
+        <span className="sync"><i/>Синхр. 2 мин назад</span>
+      </div>
+      <div className="pagehead">
+        <h1>{subObj.name}{subObj.gen && <span className="star" style={{fontSize:'.45em'}}>*</span>}
+          <span className="limebadge"><i/>{subObj.badge}</span></h1>
+        <div className="headctl">
+          <div className="datepill">{I.cal}Янв — Май 2026 ▾</div>
+          <button className="exportbtn">{I.dl}Экспорт отчёта</button>
+        </div>
+      </div>
+
+      <Active go={go}/>
+
+      <p className="pgnote">Значения и разделы со звёздочкой (*) — сгенерированные данные для демонстрации макета. Остальные показатели — из отчётности Арта Групп.<br/>Цвета каналов едины по всему дашборду: Ozon — синий · Wildberries — сиреневый · Яндекс Маркет — жёлтый.</p>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>
